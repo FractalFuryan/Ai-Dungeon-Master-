@@ -1,0 +1,21 @@
+{
+  "name": "ai-dungeon-master",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Voice-driven multiplayer tabletop RPG companion",
+  "author": "Your Name",
+  "license": "MIT",
+  "scripts": {
+    "sync": "cap sync",
+    "build": "mkdir -p dist && cp index.html app.js dist/",
+    "dev": "python -m http.server 3000"
+  },
+  "dependencies": {
+    "@capacitor/core": "^6.0.0",
+    "@capacitor/ios": "^6.0.0",
+    "@capacitor/android": "^6.0.0"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "^6.0.0"
+  }
+}

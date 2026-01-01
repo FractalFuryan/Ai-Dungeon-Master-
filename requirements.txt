@@ -1,0 +1,7 @@
+fastapi
+uvicorn
+openai
+redis
+websocket-client
+qrcode[pil]
+python-dotenv

@@ -1,0 +1,38 @@
+__pycache__/
+*.pyc
+.env.env.local
+
+# Dependencies
+node_modules/
+package-lock.json
+yarn.lock
+
+# Build outputs
+dist/
+build/
+venv/
+env/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Capacitor native builds
+ios/App/Podfile.lock
+android/.gradle/
+android/build/
+android/.idea/
+*.xcworkspace/
+
+# Database
+*.db
+*.sqlite
+*.sqlite3
+
+# Logs
+*.log
+npm-debug.log*
