@@ -201,4 +201,13 @@ async def dice_roll(session_id: str, dice_type: str = "d20", modifier: int = 0):
     return result
 
 # Serve client statically from backend (best for Codespaces)
-app.mount("/", StaticFiles(directory="../client", html=True), name="static")
+# Use absolute path resolution for production compatibility
+import pathlib
+client_dir = pathlib.Path(__file__).parent.parent / "client"
+if client_dir.exists():
+    app.mount("/", StaticFiles(directory=str(client_dir), html=True), name="static")
+else:
+    # Fallback for different deployment structures
+    @app.get("/")
+    async def root():
+        return {"message": "AI Dungeon Master API", "version": "1.1.0", "docs": "/docs"}

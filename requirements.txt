@@ -1,7 +1,23 @@
-fastapi
-uvicorn
-openai
-redis
-websocket-client
-qrcode[pil]
-python-dotenv
+# Core Framework
+fastapi==0.109.0
+uvicorn[standard]==0.27.0
+python-dotenv==1.0.0
+
+# WebSocket Support
+websockets==12.0
+
+# Static Files (required for StaticFiles in production)
+aiofiles==23.2.1
+
+# AI & TTS
+openai==1.10.0
+
+# QR Code Generation
+qrcode[pil]==7.4.2
+pillow==10.2.0
+
+# Database
+# SQLite is built into Python, no additional package needed
+
+# Optional (can be removed if not using Redis)
+# redis==5.0.1
