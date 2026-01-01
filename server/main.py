@@ -10,10 +10,14 @@ from .dice import roll_dice
 from .memory import get_memory, update_memory
 from .dm_engine import process_action
 from .database import init_db, save_campaign, load_campaign, list_campaigns
+from .roll20_adapter import router as roll20_router
 
 load_dotenv()
 
 app = FastAPI()
+
+# === Roll20 Integration ===
+app.include_router(roll20_router, prefix="/roll20", tags=["roll20"])
 
 # === CORS for Codespaces (critical) ===
 app.add_middleware(

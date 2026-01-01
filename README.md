@@ -5,6 +5,8 @@ Join via QR code · Speak your actions · Hear a voiced DM with personality · T
 
 No apps. No accounts. No Discord. Just phones and imagination.
 
+> **NEW:** Roll20 Integration now available! See [ROLL20_GUIDE.md](ROLL20_GUIDE.md) for chat-based AI DM companion mode.
+
 ## ✨ Features
 
 - **QR Code Join** – Host creates session → QR appears → Everyone scans → Instant multiplayer
@@ -13,6 +15,7 @@ No apps. No accounts. No Discord. Just phones and imagination.
 - **Natural Turn System** – Say "my turn" or "next" → Get in queue → Only active player drives the story
 - **Persistent Campaigns** – Save and load your ongoing adventure
 - **Phone & Tablet First** – Works beautifully on mobile browsers
+- **Roll20 Integration** – Chat-based AI DM companion for virtual tabletops
 - **Zero Setup** – Runs in GitHub Codespaces with one click
 
 ## 🚀 Quick Start (60 seconds)
@@ -68,8 +71,9 @@ Perfect for weekly games.
 
 - **At the table**: Players roll physical dice and announce results (social trust)
 - **Remote play**: Optional system dice mode (coming soon)
+- **Roll20 integration**: Chat-based AI DM companion for virtual tabletops (see [ROLL20_GUIDE.md](ROLL20_GUIDE.md))
 
-AI Dungeon Master adapts to both styles without forcing rules.
+AI Dungeon Master adapts to all play styles without forcing rules.
 
 ## 🎲 Design Philosophy
 
@@ -139,6 +143,8 @@ Open in browser → Play!
 - [TURN_SYSTEM_GUIDE.md](TURN_SYSTEM_GUIDE.md) – How turns work
 - [PERSONA_GUIDE.md](PERSONA_GUIDE.md) – The 4 DM voices explained
 - [PERSISTENCE_GUIDE.md](PERSISTENCE_GUIDE.md) – Save/load campaigns
+- [ROLL20_GUIDE.md](ROLL20_GUIDE.md) – **NEW:** Virtual tabletop integration
+- [MOBILE_GUIDE.md](MOBILE_GUIDE.md) – Build native iOS/Android apps
 
 ## 🤝 Contributing
 
