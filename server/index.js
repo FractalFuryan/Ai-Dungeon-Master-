@@ -33,6 +33,8 @@ app.use(express.json());
 app.use(express.static(join(__dirname, '../public')));
 
 // Routes
+// NOTE: For production deployment, consider adding rate limiting middleware
+// to prevent abuse (e.g., express-rate-limit package)
 app.get('/', (req, res) => {
   res.sendFile(join(__dirname, '../public/index.html'));
 });
@@ -59,6 +61,7 @@ app.post('/api/session/create', async (req, res) => {
 });
 
 // Join session page
+// NOTE: Rate limiting recommended for production to prevent abuse
 app.get('/join/:sessionId', (req, res) => {
   res.sendFile(join(__dirname, '../public/player.html'));
 });
@@ -189,10 +192,13 @@ io.on('connection', (socket) => {
     try {
       const result = diceRoller.roll(diceNotation);
       
+      // Determine who is rolling
+      const rollerName = roller || playerName || 'Unknown';
+      
       // Store in campaign memory
       campaignMemory.addMessage(sessionId, {
         speaker: 'System',
-        text: `${roller || playerName} rolled ${diceNotation}: ${result.total}`,
+        text: `${rollerName} rolled ${diceNotation}: ${result.total}`,
         type: 'dice',
         details: result,
         timestamp: Date.now()
@@ -200,7 +206,7 @@ io.on('connection', (socket) => {
       
       // Broadcast to all
       io.to(`session:${sessionId}`).emit('dice:result', {
-        playerName: roller || playerName,
+        playerName: rollerName,
         notation: diceNotation,
         result
       });
