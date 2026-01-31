@@ -2,7 +2,17 @@ from openai import OpenAI
 import os
 import base64
 
-client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+# Lazy client initialization to avoid errors during import
+_client = None
+
+def get_client():
+    global _client
+    if _client is None:
+        api_key = os.getenv("OPENAI_API_KEY", "")
+        if not api_key:
+            raise ValueError("OPENAI_API_KEY environment variable not set")
+        _client = OpenAI(api_key=api_key)
+    return _client
 
 # === DM PERSONAS ===
 PERSONAS = {
@@ -30,6 +40,7 @@ PERSONAS = {
 
 def generate_narration_with_persona(session_id: str, prompt: str, persona_key: str = "classic") -> dict:
     persona = PERSONAS.get(persona_key, PERSONAS["classic"])
+    client = get_client()
     
     response = client.chat.completions.create(
         model="gpt-4o-mini",
@@ -58,6 +69,7 @@ def generate_narration_with_persona(session_id: str, prompt: str, persona_key: s
     }
 
 def generate_narration(prompt: str) -> str:
+    client = get_client()
     response = client.chat.completions.create(
         model="gpt-4o-mini",
         messages=[{"role": "system", "content": "You are a Dungeon Master narrating a fantasy adventure. Describe scenes vividly but briefly."},
@@ -67,10 +79,32 @@ def generate_narration(prompt: str) -> str:
 
 def text_to_speech(text: str) -> bytes:
     # Returns audio bytes for client playback
+    client = get_client()
     response = client.audio.speech.create(model="tts-1", voice="alloy", input=text)
     return response.content
 
 def speech_to_text(audio_bytes: bytes) -> str:
     # For server-side STT if needed; MVP uses client-side
+    client = get_client()
     response = client.audio.transcriptions.create(model="whisper-1", file=("audio.wav", audio_bytes))
     return response.text
+
+def generate_text(persona_key: str, prompt: str) -> str:
+    """
+    Simple text generation for Roll20 integration (no audio).
+    Uses persona-aware system prompts.
+    """
+    persona = PERSONAS.get(persona_key, PERSONAS["classic"])
+    client = get_client()
+    
+    response = client.chat.completions.create(
+        model=os.getenv("OPENAI_MODEL", "gpt-4o-mini"),
+        temperature=0.8,
+        messages=[
+            {"role": "system", "content": persona["system_prompt"]},
+            {"role": "user", "content": prompt}
+        ]
+    )
+    
+    return response.choices[0].message.content.strip()
+

@@ -1,4 +1,4 @@
-# 🚀 Deployment Guide — Production Ready
+# 🚀 Deployment Guide — VoiceDM Roll20 Harmony v1.2.0
 
 ## Quick Deploy Options
 
@@ -6,18 +6,26 @@
 
 **Time: 5 minutes**
 
-1. **Sign up:** https://render.com
-2. **New Web Service** → Connect GitHub repo
-3. **Configure:**
+1. **Fork this repository** to your GitHub account.
+
+2. **Sign up:** https://render.com
+
+3. **New Web Service** → Connect GitHub repo
+
+4. **Configure:**
    ```
-   Name: ai-dungeon-master
-   Runtime: Python 3
+   Name: voicedm-roll20
+   Runtime: Python 3.11
    Build Command: pip install -r requirements.txt
-   Start Command: uvicorn server.main:app --host 0.0.0.0 --port $PORT
+   Start Command: uvicorn server.main:app --host 0.0.0.0 --port 8000
    ```
-4. **Environment Variables:**
+
+5. **Environment Variables:**
    ```
-   OPENAI_API_KEY=your_openai_api_key_here
+   OPENAI_API_KEY=sk-...
+   OPENAI_MODEL=gpt-4o-mini
+   DEFAULT_PERSONA=classic
+   LOG_LEVEL=INFO
    ```
 5. **Deploy** → Wait 2-3 minutes
 6. **Copy URL:** e.g., `https://ai-dungeon-master-xyz.onrender.com`

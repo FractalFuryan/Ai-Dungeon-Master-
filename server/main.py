@@ -1,41 +1,302 @@
-from fastapi import FastAPI, WebSocket, WebSocketDisconnect
+from fastapi import FastAPI, WebSocket, WebSocketDisconnect, Request, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
-from fastapi.responses import HTMLResponse
+from fastapi.responses import HTMLResponse, JSONResponse
+import logging
 import uuid
 import os
+import pathlib
 from dotenv import load_dotenv
-from .llm import generate_narration
+from .llm import generate_narration, PERSONAS
 from .dice import roll_dice
 from .memory import get_memory, update_memory
 from .dm_engine import process_action
 from .database import init_db, save_campaign, load_campaign, list_campaigns
-from .roll20_adapter import router as roll20_router
+from .roll20_adapter import router
+from .config import settings
 
 load_dotenv()
 
-app = FastAPI()
+# Configure logging
+logging.basicConfig(
+    level=getattr(logging, settings.log_level),
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+)
+logger = logging.getLogger(__name__)
 
-# === Roll20 Integration ===
-app.include_router(roll20_router, prefix="/roll20", tags=["roll20"])
+app = FastAPI(
+    title="VoiceDM Roll20 Harmony",
+    description="Adaptive AI Dungeon Master for Roll20",
+    version="1.2.0",
+    docs_url="/docs",
+    redoc_url="/redoc"
+)
 
-# === CORS for Codespaces (critical) ===
+# CORS middleware
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=["*"],  # In production, restrict this
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# Include routers
+app.include_router(router, prefix="/api/v1")
 
 # === Initialize database on startup ===
 @app.on_event("startup")
 async def startup_event():
     init_db()
 
-# In-memory sessions
+# In-memory sessions for WebSocket support (legacy)
 sessions = {}
 connections = {}  # session_id -> list of websockets
+
+@app.get("/", response_class=HTMLResponse)
+async def root():
+    """Serve the relay interface"""
+    html_content = """
+    <!doctype html>
+    <html>
+    <head>
+        <title>VoiceDM Roll20 Relay</title>
+        <style>
+            body {
+                background: #0f0f12;
+                color: #eaeaf0;
+                font-family: 'Segoe UI', system-ui, sans-serif;
+                padding: 20px;
+                max-width: 800px;
+                margin: 0 auto;
+            }
+            .header {
+                text-align: center;
+                margin-bottom: 30px;
+                border-bottom: 2px solid #333;
+                padding-bottom: 20px;
+            }
+            .card {
+                background: #15151b;
+                border-radius: 12px;
+                padding: 20px;
+                margin-bottom: 20px;
+                border: 1px solid #333;
+            }
+            textarea, input {
+                width: 100%;
+                background: #1a1a22;
+                color: #eaeaf0;
+                border: 1px solid #444;
+                border-radius: 8px;
+                padding: 12px;
+                font-size: 14px;
+                font-family: 'Monaco', 'Menlo', monospace;
+            }
+            button {
+                padding: 12px 24px;
+                border-radius: 8px;
+                background: #4a4aff;
+                color: white;
+                border: none;
+                cursor: pointer;
+                font-size: 16px;
+                font-weight: 600;
+                transition: background 0.2s;
+            }
+            button:hover {
+                background: #5a5aff;
+            }
+            pre {
+                white-space: pre-wrap;
+                background: #1a1a22;
+                padding: 15px;
+                border-radius: 8px;
+                border: 1px solid #333;
+                max-height: 500px;
+                overflow-y: auto;
+            }
+            .status {
+                padding: 10px;
+                border-radius: 6px;
+                margin: 10px 0;
+            }
+            .status.ok {
+                background: #1a331a;
+                border: 1px solid #2a5a2a;
+            }
+            .status.error {
+                background: #331a1a;
+                border: 1px solid #5a2a2a;
+            }
+            code {
+                background: #2a2a33;
+                padding: 2px 6px;
+                border-radius: 4px;
+                font-family: 'Monaco', 'Menlo', monospace;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="header">
+            <h1>⚔️ VoiceDM Roll20 Relay</h1>
+            <p>Adaptive AI Dungeon Master Interface</p>
+        </div>
+        
+        <div class="card">
+            <h3>📤 Process Roll20 Queue</h3>
+            <p>Backend URL:</p>
+            <input id="backend" value="http://localhost:8000/api/v1/roll20/command_batch">
+            
+            <p>Paste AIDM_QUEUE JSON:</p>
+            <textarea id="queue" rows="6" placeholder='[{"campaign_id": "...", "player_name": "...", "text": "..."}]'></textarea>
+            
+            <div style="margin: 15px 0;">
+                <button onclick="processQueue()">Process Queue</button>
+                <button onclick="testConnection()" style="background: #333; margin-left: 10px;">Test Connection</button>
+            </div>
+            
+            <div id="status"></div>
+        </div>
+        
+        <div class="card">
+            <h3>📝 Output (Copy to Roll20)</h3>
+            <pre id="output">Output will appear here...</pre>
+        </div>
+        
+        <div class="card">
+            <h3>ℹ️ How to Use</h3>
+            <ol>
+                <li>In Roll20, players use <code>!aidm [action]</code></li>
+                <li>GM uses <code>!aidm_dump</code> to get JSON</li>
+                <li>Paste JSON above and click Process</li>
+                <li>Copy output back to Roll20 chat</li>
+            </ol>
+            <p><small>Version 1.2.0 | Session-aware | Anti-railroad detection</small></p>
+        </div>
+        
+        <script>
+            async function testConnection() {
+                const backend = document.getElementById('backend').value;
+                const status = document.getElementById('status');
+                
+                try {
+                    const response = await fetch(backend.replace('/command_batch', '/health'));
+                    if (response.ok) {
+                        status.innerHTML = '<div class="status ok">✅ Backend connected successfully</div>';
+                    } else {
+                        status.innerHTML = '<div class="status error">❌ Backend error: ' + response.status + '</div>';
+                    }
+                } catch (error) {
+                    status.innerHTML = '<div class="status error">❌ Cannot connect to backend: ' + error.message + '</div>';
+                }
+            }
+            
+            async function processQueue() {
+                const backend = document.getElementById('backend').value;
+                const queueInput = document.getElementById('queue').value;
+                const output = document.getElementById('output');
+                const status = document.getElementById('status');
+                
+                output.textContent = 'Processing...';
+                status.innerHTML = '';
+                
+                try {
+                    const events = JSON.parse(queueInput);
+                    
+                    const response = await fetch(backend, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ events })
+                    });
+                    
+                    if (!response.ok) {
+                        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                    }
+                    
+                    const data = await response.json();
+                    
+                    // Format output
+                    let formattedOutput = '';
+                    data.outputs.forEach(item => {
+                        if (typeof item === 'object' && item.chat) {
+                            formattedOutput += item.chat + '\\n\\n';
+                            if (item.debug) {
+                                formattedOutput += '--- DEBUG ---\\n';
+                                formattedOutput += JSON.stringify(item.debug, null, 2) + '\\n\\n';
+                            }
+                        } else {
+                            formattedOutput += item + '\\n\\n';
+                        }
+                    });
+                    
+                    output.textContent = formattedOutput || 'No output generated';
+                    status.innerHTML = '<div class="status ok">✅ Processed ' + events.length + ' events</div>';
+                    
+                } catch (error) {
+                    output.textContent = 'Error: ' + error.message;
+                    status.innerHTML = '<div class="status error">❌ Processing failed</div>';
+                    console.error('Processing error:', error);
+                }
+            }
+        </script>
+    </body>
+    </html>
+    """
+    return html_content
+
+@app.get("/health")
+async def health_check():
+    """Health check endpoint"""
+    from .hybrid_engine import get_narration_stats
+    
+    narration_info = get_narration_stats()
+    
+    return {
+        "status": "healthy",
+        "service": "VoiceDM Roll20 Harmony",
+        "version": "1.3.0",  # Bumped for featherweight update
+        "narration_mode": narration_info["mode"],
+        "dependencies": {
+            "openai": narration_info["llm_available"],
+            "templates": True,
+            "total_required": narration_info["dependencies_required"]
+        },
+        "default_persona": settings.default_persona,
+        "template_library": {
+            "frames": narration_info["template_stats"]["frames"],
+            "tones": narration_info["template_stats"]["tones"],
+            "variations": narration_info["template_stats"]["total_text_variations"]
+        }
+    }
+
+@app.get("/stats")
+async def get_stats():
+    """Get service statistics (protected in production)"""
+    from .memory import _MEM
+    return {
+        "active_sessions": len(_MEM),
+        "session_ids": list(_MEM.keys())[:10]  # First 10 only
+    }
+
+# Error handlers
+@app.exception_handler(HTTPException)
+async def http_exception_handler(request: Request, exc: HTTPException):
+    logger.error(f"HTTP error: {exc.detail}")
+    return JSONResponse(
+        status_code=exc.status_code,
+        content={"error": exc.detail}
+    )
+
+@app.exception_handler(Exception)
+async def general_exception_handler(request: Request, exc: Exception):
+    logger.error(f"Unhandled error: {exc}", exc_info=True)
+    return JSONResponse(
+        status_code=500,
+        content={"error": "Internal server error", "detail": str(exc)}
+    )
+
+# === Legacy WebSocket Support (for non-Roll20 clients) ===
 
 @app.post("/session/create")
 async def create_session():
@@ -95,8 +356,6 @@ async def websocket_endpoint(websocket: WebSocket, session_id: str):
 async def set_persona(session_id: str, persona: str):
     if session_id not in sessions:
         return {"error": "Invalid session"}
-    # Get valid personas from llm module
-    from .llm import PERSONAS
     if persona not in PERSONAS:
         return {"error": "Invalid persona"}
     sessions[session_id]["memory"]["persona"] = persona
@@ -199,15 +458,3 @@ async def dice_roll(session_id: str, dice_type: str = "d20", modifier: int = 0):
     result = roll_dice(dice_type, modifier)
     update_memory(session_id, "last_roll", result)
     return result
-
-# Serve client statically from backend (best for Codespaces)
-# Use absolute path resolution for production compatibility
-import pathlib
-client_dir = pathlib.Path(__file__).parent.parent / "client"
-if client_dir.exists():
-    app.mount("/", StaticFiles(directory=str(client_dir), html=True), name="static")
-else:
-    # Fallback for different deployment structures
-    @app.get("/")
-    async def root():
-        return {"message": "AI Dungeon Master API", "version": "1.1.0", "docs": "/docs"}

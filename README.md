@@ -5,33 +5,80 @@ Join via QR code · Speak your actions · Hear a voiced DM with personality · T
 
 No apps. No accounts. No Discord. Just phones and imagination.
 
-> **NEW:** Roll20 Integration now available! See [ROLL20_GUIDE.md](ROLL20_GUIDE.md) for chat-based AI DM companion mode.
+> **NEW in v1.3.0:** 🪶 **Featherweight Hybrid AI** – Works with ZERO dependencies by default! Optional LLM enhancement for premium narration. See [FEATHERWEIGHT_GUIDE.md](FEATHERWEIGHT_GUIDE.md).
+
+> **Roll20 Integration** available! See [ROLL20_GUIDE.md](ROLL20_GUIDE.md) for chat-based AI DM companion mode.
 
 ## ✨ Features
 
+### Core Experience
 - **QR Code Join** – Host creates session → QR appears → Everyone scans → Instant multiplayer
 - **Voice In / Voice Out** – Push-to-talk → AI Dungeon Master responds with immersive narration
 - **4 Switchable DM Personas** – Classic Fantasy · Gothic Horror · Whimsical · Sci-Fi (each with unique voice + style)
 - **Natural Turn System** – Say "my turn" or "next" → Get in queue → Only active player drives the story
 - **Persistent Campaigns** – Save and load your ongoing adventure
 - **Phone & Tablet First** – Works beautifully on mobile browsers
+
+### Advanced Intelligence (v1.2.0+)
+- **Imagination Analysis** – Detects creative, detailed player input and rewards it
+- **Anti-Railroading Detection** – Warns when GM forces outcomes inappropriately
+- **6 Adaptive Narrative Frames** – Story structures adapt to player creativity and risk
+- **Session Management** – Isolated campaigns with auto-cleanup
+
+### Featherweight Architecture (v1.3.0+)
+- **Zero Dependencies by Default** – Works offline with pure template narration
+- **3 Narration Modes:**
+  - `template` (default) – 256+ variations, <1ms response, $0 cost
+  - `hybrid` – Templates + optional LLM polish with graceful fallback
+  - `llm` (legacy) – Full generation (v1.2.0 behavior)
+- **No Platform Lock-In** – Swap language models without changing code
+- **Deterministic & Auditable** – All reasoning in code, not black-box ML
+
+### Integrations
 - **Roll20 Integration** – Chat-based AI DM companion for virtual tabletops
 - **Zero Setup** – Runs in GitHub Codespaces with one click
 
 ## 🚀 Quick Start (60 seconds)
 
-1. Open this repo in **GitHub Codespaces** (or run locally)
-2. In terminal:
-   ```bash
-   pip install -r requirements.txt
-   uvicorn server.main:app --host 0.0.0.0 --port 8000
-   ```
-3. In Ports tab → Make port 8000 **Public**
-4. Open the forwarded URL
-5. Click **Create New Session** → Share the QR code
-6. Everyone scans → Say your name → Adventure begins!
+### Option 1: Zero Dependencies (Recommended)
+```bash
+# Clone and run
+git clone https://github.com/yourusername/Ai-Dungeon-Master-.git
+cd Ai-Dungeon-Master-
+pip install -r requirements.txt
+uvicorn server.main:app --host 0.0.0.0 --port 8000
+```
+✅ **Works immediately** – No API keys required  
+✅ **Template narration** – 256+ variations, <1ms response  
+✅ **All intelligence active** – Imagination analysis, anti-railroading, adaptive frames
 
-> Pro tip: Use a phone for players, laptop/tablet for host (to switch personas & save).
+### Option 2: With LLM Enhancement
+```bash
+# Add to .env file
+NARRATION_MODE=hybrid  # or 'llm' for v1.2.0 behavior
+OPENAI_API_KEY=sk-...
+```
+✅ **Templates + LLM polish** – Best of both worlds  
+✅ **Graceful fallback** – Works offline if API unavailable  
+✅ **Cost effective** – Templates for common actions, LLM for special moments
+
+### Quick Test
+```bash
+# Test zero-dependency operation
+python3 test_featherweight.py
+
+# Start server
+uvicorn server.main:app --host 0.0.0.0 --port 8000
+```
+
+### GitHub Codespaces
+1. Open this repo in Codespaces
+2. In Ports tab → Make port 8000 **Public**
+3. Open forwarded URL
+4. Click **Create New Session** → Share QR code
+5. Everyone scans → Say your name → Adventure begins!
+
+> 💡 **Pro tip:** Start with template mode (zero cost), upgrade to hybrid for special sessions.
 
 ## 🎭 DM Personas
 
@@ -62,10 +109,35 @@ Perfect for weekly games.
 
 ## 🛠 Tech Stack
 
+**Core Framework:**
 - FastAPI + WebSockets (real-time sync)
-- OpenAI GPT-4o-mini + TTS (DM brain & voice)
+- Pydantic v2 (type-safe configuration)
 - SQLite (campaign persistence)
 - Pure HTML/JS frontend (PWA-ready)
+
+**AI/Intelligence:**
+- **Template Engine** (default) – 6 narrative frames, 22 tone combinations, pure Python
+- **Hybrid Engine** (optional) – Template + LLM polish with graceful degradation
+- **OpenAI GPT-4o-mini + TTS** (optional) – For hybrid/llm narration modes
+
+**Intelligence Systems (Deterministic):**
+- Imagination analysis (creative input scoring)
+- Anti-railroading detection (pattern warnings)
+- Adaptive frame selection (6 narrative structures)
+- Session management (isolated campaigns, auto-cleanup)
+- Character tracking (momentum, creativity signals)
+
+## 🪶 Narration Modes
+
+| Mode     | API Key Required | Response Time | Cost/Request | Best For                           |
+|----------|------------------|---------------|--------------|-------------------------------------|
+| template | ❌ No           | <1ms          | $0           | Local dev, offline, high-volume     |
+| hybrid   | ✅ Yes          | 50-200ms      | ~$0.0001     | Premium experience, graceful backup |
+| llm      | ✅ Yes          | 100-500ms     | ~$0.001      | Full generation (v1.2.0 legacy)     |
+
+**Default:** `template` mode (zero dependencies)  
+**Configure:** Set `NARRATION_MODE=hybrid` or `llm` in `.env`  
+**Learn more:** See [FEATHERWEIGHT_GUIDE.md](FEATHERWEIGHT_GUIDE.md)
 
 ## 🪑 Table Play vs 🌐 Remote Play
 
