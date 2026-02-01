@@ -14,6 +14,7 @@ from .dm_engine import process_action
 from .database import init_db, save_campaign, load_campaign, list_campaigns
 from .roll20_adapter import router
 from .config import settings
+from .scanner import scan_qr_code, get_rulesets
 
 load_dotenv()
 
@@ -458,3 +459,43 @@ async def dice_roll(session_id: str, dice_type: str = "d20", modifier: int = 0):
     result = roll_dice(dice_type, modifier)
     update_memory(session_id, "last_roll", result)
     return result
+
+# === Scanner Endpoints ===
+
+@app.get("/scanner", response_class=HTMLResponse)
+async def scanner_interface():
+    """Serve the scanner interface"""
+    scanner_path = pathlib.Path(__file__).parent.parent / "scanner.html"
+    try:
+        with open(scanner_path, 'r', encoding='utf-8') as f:
+            return HTMLResponse(content=f.read())
+    except FileNotFoundError:
+        return HTMLResponse(
+            content="<h1>Scanner not found</h1><p>scanner.html missing</p>",
+            status_code=404
+        )
+
+@app.get("/api/scanner/rulesets")
+async def list_rulesets():
+    """Get available rulesets"""
+    return get_rulesets()
+
+@app.post("/api/scanner/load")
+async def load_from_qr(request: Request):
+    """Load rules from QR code data"""
+    try:
+        data = await request.json()
+        qr_data = data.get("qr_data", "")
+        
+        if not qr_data:
+            raise HTTPException(status_code=400, detail="No QR data provided")
+        
+        ruleset = scan_qr_code(qr_data)
+        if not ruleset:
+            raise HTTPException(status_code=404, detail="Ruleset not found")
+        
+        return ruleset
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))

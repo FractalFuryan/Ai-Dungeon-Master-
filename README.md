@@ -87,6 +87,51 @@ Randomness is **never** used to:
 
 ---
 
+## 📱 **QR-Based Rule Scanner (NEW)**
+
+VoiceDM now includes a **mobile-friendly rule scanner** that lets you load RPG rulesets via QR codes or camera input.
+
+### How It Works
+
+1. **Scan a QR code** containing a ruleset identifier (e.g., `dnd5e_basic`)
+2. **Pre-indexed JSON rules** load instantly from `server/rulesets/`
+3. **Rules integrate** with the existing dice and randomness systems
+4. **Zero breaking changes** — scanner is an optional add-on
+
+### Access the Scanner
+
+Visit **[http://localhost:8000/scanner](http://localhost:8000/scanner)** after starting the server.
+
+### API Endpoints
+
+- `GET /api/scanner/rulesets` - List available rulesets
+- `POST /api/scanner/load` - Load ruleset from QR data
+- `GET /scanner` - Mobile scanner interface
+
+### Supported QR Formats
+
+```
+voicedm://rules/dnd5e/basic
+{"ruleset": "dnd5e", "version": "basic"}
+dnd5e_basic.json
+dnd5e_basic
+```
+
+### Pre-Loaded Rulesets
+
+- **D&D 5e Basic**: Combat, skills, spells, ability checks
+- *(More rulesets coming: Pathfinder, Call of Cthulhu, custom systems)*
+
+### Design Principles
+
+- **Lightweight**: No OCR, no complex parsing (yet)
+- **Pre-indexed**: JSON rulesets, not live scanning
+- **Camera-ready**: HTML5 camera access on mobile
+- **Fallback input**: Manual QR entry if camera unavailable
+- **Zero dependencies**: Python stdlib only
+
+---
+
 ## ✨ Core Principles
 
 - **Player imagination is first-class input**

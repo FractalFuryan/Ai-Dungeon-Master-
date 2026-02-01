@@ -1,0 +1,128 @@
+{
+  "name": "D&D 5e Basic Rules",
+  "version": "1.0",
+  "description": "Core combat and skill rules for D&D 5th Edition",
+  "source": "D&D 5e SRD",
+  "rules": {
+    "combat": [
+      {
+        "name": "Attack Roll",
+        "description": "To make an attack roll, roll a d20 and add your attack modifier.",
+        "formula": "d20 + ability_modifier + proficiency_bonus",
+        "example": "d20+5",
+        "tags": ["attack", "combat", "basic"]
+      },
+      {
+        "name": "Damage Roll",
+        "description": "Roll the weapon's damage dice and add your ability modifier.",
+        "formula": "weapon_damage + ability_modifier",
+        "example": "1d8+3",
+        "tags": ["damage", "combat", "basic"]
+      },
+      {
+        "name": "Armor Class",
+        "description": "To hit a target, your attack roll must equal or exceed their AC.",
+        "condition": "attack_total >= target_ac",
+        "tags": ["ac", "combat", "defense"]
+      },
+      {
+        "name": "Critical Hit",
+        "description": "When you roll a natural 20, you score a critical hit. Roll all damage dice twice.",
+        "condition": "d20_roll == 20",
+        "effect": "double_damage_dice",
+        "tags": ["critical", "combat", "damage"]
+      },
+      {
+        "name": "Critical Miss",
+        "description": "When you roll a natural 1, you automatically miss.",
+        "condition": "d20_roll == 1",
+        "effect": "automatic_miss",
+        "tags": ["critical", "combat", "miss"]
+      }
+    ],
+    "skills": [
+      {
+        "name": "Ability Check",
+        "description": "Roll a d20 and add the relevant ability modifier.",
+        "formula": "d20 + ability_modifier",
+        "tags": ["skill", "check", "ability"]
+      },
+      {
+        "name": "Skill Check",
+        "description": "Roll a d20 and add your ability modifier and proficiency bonus if proficient.",
+        "formula": "d20 + ability_modifier + proficiency_bonus (if proficient)",
+        "tags": ["skill", "check", "proficiency"]
+      },
+      {
+        "name": "Saving Throw",
+        "description": "Roll a d20 and add the relevant ability modifier and proficiency bonus if proficient.",
+        "formula": "d20 + ability_modifier + proficiency_bonus (if proficient)",
+        "tags": ["save", "defense"]
+      },
+      {
+        "name": "Advantage",
+        "description": "Roll two d20s and use the higher result.",
+        "formula": "2d20, take highest",
+        "tags": ["advantage", "modifier", "benefit"]
+      },
+      {
+        "name": "Disadvantage",
+        "description": "Roll two d20s and use the lower result.",
+        "formula": "2d20, take lowest",
+        "tags": ["disadvantage", "modifier", "penalty"]
+      }
+    ],
+    "spells": [
+      {
+        "name": "Spell Attack",
+        "description": "Roll a d20 and add your spellcasting ability modifier and proficiency bonus.",
+        "formula": "d20 + spellcasting_modifier + proficiency_bonus",
+        "tags": ["spell", "attack", "magic"]
+      },
+      {
+        "name": "Spell Save DC",
+        "description": "Targets must make a saving throw against your spell save DC.",
+        "formula": "8 + proficiency_bonus + spellcasting_modifier",
+        "tags": ["spell", "save", "dc", "magic"]
+      },
+      {
+        "name": "Spell Damage",
+        "description": "Roll the spell's damage dice. Add ability modifier only if specified.",
+        "formula": "spell_damage_dice (+ spellcasting_modifier if specified)",
+        "tags": ["spell", "damage", "magic"]
+      },
+      {
+        "name": "Concentration",
+        "description": "When you take damage while concentrating, make a Constitution saving throw (DC 10 or half damage, whichever is higher).",
+        "formula": "d20 + constitution_modifier",
+        "condition": "result >= max(10, damage/2)",
+        "tags": ["spell", "concentration", "save"]
+      }
+    ]
+  },
+  "quick_reference": {
+    "ability_scores": {
+      "str": "Strength",
+      "dex": "Dexterity",
+      "con": "Constitution",
+      "int": "Intelligence",
+      "wis": "Wisdom",
+      "cha": "Charisma"
+    },
+    "common_dc": {
+      "very_easy": 5,
+      "easy": 10,
+      "medium": 15,
+      "hard": 20,
+      "very_hard": 25,
+      "nearly_impossible": 30
+    },
+    "proficiency_bonus_by_level": {
+      "1-4": 2,
+      "5-8": 3,
+      "9-12": 4,
+      "13-16": 5,
+      "17-20": 6
+    }
+  }
+}
