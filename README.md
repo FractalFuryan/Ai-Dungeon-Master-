@@ -5,6 +5,8 @@ Join via QR code · Speak your actions · Hear a voiced DM with personality · T
 
 No apps. No accounts. No Discord. Just phones and imagination.
 
+> **NEW in v1.3.1:** 🎲 **Integrated Randomness & Dice Systems** – Cryptographically secure RNG with 4 modes, full RPG dice rolling (d20, advantage/disadvantage, criticals), session replay capability. Zero dependencies!
+
 > **NEW in v1.3.0:** 🪶 **Featherweight Hybrid AI** – Works with ZERO dependencies by default! Optional LLM enhancement for premium narration. See [FEATHERWEIGHT_GUIDE.md](FEATHERWEIGHT_GUIDE.md).
 
 > **Roll20 Integration** available! See [ROLL20_GUIDE.md](ROLL20_GUIDE.md) for chat-based AI DM companion mode.
@@ -33,6 +35,20 @@ No apps. No accounts. No Discord. Just phones and imagination.
   - `llm` (legacy) – Full generation (v1.2.0 behavior)
 - **No Platform Lock-In** – Swap language models without changing code
 - **Deterministic & Auditable** – All reasoning in code, not black-box ML
+
+### Randomness & Dice (v1.3.1+)
+- **4 RNG Modes:**
+  - `secure` (default) – OS entropy, cryptographically secure
+  - `deterministic` – Seeded for replay, perfect for recording
+  - `weighted` – Non-linear distribution for dramatic moments
+  - `linear` – Predictable progression for puzzles
+- **Full RPG Dice Rolling:**
+  - Expression parsing: `d20`, `2d6+3`, `4d6-1`
+  - Advantage/disadvantage mechanics (roll twice, take best/worst)
+  - Critical detection (natural 20s and 1s)
+  - Roll history and statistics
+- **Session-Specific RNG** – Each campaign gets deterministic replay
+- **Sub-Millisecond Performance** – Zero external dependencies
 
 ### Integrations
 - **Roll20 Integration** – Chat-based AI DM companion for virtual tabletops
@@ -118,6 +134,8 @@ Perfect for weekly games.
 **AI/Intelligence:**
 - **Template Engine** (default) – 6 narrative frames, 22 tone combinations, pure Python
 - **Hybrid Engine** (optional) – Template + LLM polish with graceful degradation
+- **Randomness Engine** (v1.3.1) – 4 RNG modes with OS entropy, session replay
+- **Dice System** (v1.3.1) – Full RPG dice with expressions, advantage/disadvantage
 - **OpenAI GPT-4o-mini + TTS** (optional) – For hybrid/llm narration modes
 
 **Intelligence Systems (Deterministic):**
@@ -126,6 +144,7 @@ Perfect for weekly games.
 - Adaptive frame selection (6 narrative structures)
 - Session management (isolated campaigns, auto-cleanup)
 - Character tracking (momentum, creativity signals)
+- Session-specific RNG (deterministic replay per campaign)
 
 ## 🪶 Narration Modes
 
@@ -142,8 +161,11 @@ Perfect for weekly games.
 ## 🪑 Table Play vs 🌐 Remote Play
 
 - **At the table**: Players roll physical dice and announce results (social trust)
-- **Remote play**: Optional system dice mode (coming soon)
+- **Remote play**: Built-in dice system with session replay (`quick_roll("d20")`)
 - **Roll20 integration**: Chat-based AI DM companion for virtual tabletops (see [ROLL20_GUIDE.md](ROLL20_GUIDE.md))
+- **Dice modes**: SECURE (default, OS entropy), DETERMINISTIC (replay), WEIGHTED (dramatic), LINEAR (puzzles)
+
+**Learn more:** See [RANDOMNESS_GUIDE.md](RANDOMNESS_GUIDE.md)
 
 AI Dungeon Master adapts to all play styles without forcing rules.
 
