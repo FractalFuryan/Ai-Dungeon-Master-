@@ -9,8 +9,10 @@ This project adds **adaptive narration, memory, and non-linear DM logic** using 
 
 No apps. No accounts. No Discord. Just phones and imagination.
 
-![RNG](https://img.shields.io/badge/Randomness-OS_Entropy-blue)
-![Dice](https://img.shields.io/badge/Dice-Integrated_System-green)
+![Version](https://img.shields.io/badge/version-1.4.0-blue)
+![RNG](https://img.shields.io/badge/Randomness-OS_Entropy-green)
+![Dice](https://img.shields.io/badge/Dice-Integrated_System-brightgreen)
+![Scanner](https://img.shields.io/badge/Scanner-QR_Rules-purple)
 ![LLM](https://img.shields.io/badge/LLM-Optional_Polish-orange)
 ![Offline](https://img.shields.io/badge/Offline-Zero_API-red)
 
