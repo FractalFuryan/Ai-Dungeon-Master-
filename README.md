@@ -1,9 +1,8 @@
-# ⚔️ VoiceDM Roll20 Harmony
+# ⚔️ VoiceDM
 
 **Adaptive AI Dungeon Master with Deterministic Logic & True Randomness**
 
-Roll20 owns dice, sheets, tokens, and maps.  
-This project adds **adaptive narration, memory, and non-linear DM logic** using a GM relay (sandbox-safe), plus a **built-in, zero-dependency dice system** designed for fairness and replayability.
+A complete tabletop RPG system with **adaptive narration, memory, and non-linear DM logic**, featuring a **built-in, zero-dependency dice system** designed for fairness and replayability. Works standalone or integrates seamlessly with Roll20.
 
 **Voice-driven · Multiplayer · QR Code Join · Zero Dependencies**
 
@@ -159,22 +158,25 @@ dnd5e_basic
 - **6 Adaptive Narrative Frames** – Story structures adapt to player creativity and risk
 - **Session Management** – Isolated campaigns with auto-cleanup
 
-### Foll20 Integration
+### Roll20 Integration (Optional)
 - **GM Relay System** – No Roll20 HTTP calls, no ToS violations, no vendor lock-in
 - **Chat-based Commands** – Players type `!aidm ...`, GM pastes JSON, system responds
 - **Sandbox-Safe** – Works within Roll20's security model
 - **See [ROLL20_GUIDE.md](ROLL20_GUIDE.md)** for complete setup
 
+---
+
 ## 🚀 How It Works
 
-### Voice-Driven Mode (Local/Mobile Play)
+### Standalone Mode (Voice-Driven Local/Mobile Play)
 1. **Host creates session** → QR code appears
 2. **Players scan** → Join instantly on their phones
 3. **Push-to-talk** → Speak your action
 4. **AI responds** → Immersive narration with character voice
 5. **Natural turns** → Say "my turn" to drive the story
+6. **Scan rulesets** → Load D&D 5e, Pathfinder, or custom rules via QR codes
 
-### Roll20 Relay Mode (Virtual Tabletop)
+### Roll20 Integration Mode (Virtual Tabletop)
 1. **Players type** `!aidm ...` in Roll20 chat
 2. **GM runs** `!aidm_dump` to collect actions
 3. **GM pastes** JSON into the VoiceDM relay page
@@ -184,24 +186,21 @@ dnd5e_basic
 
 **No Roll20 HTTP calls. No ToS violations. No vendor lock-in.**
 
+---
+
 ## 🪶 Quick Start
 
 ### Option 1: Zero Dependencies (Recommended)
 ```bash
 # Clone and run
-git clone https://github.com/FractalFuryan
-- **Roll20 Integration** – Chat-based AI DM companion for virtual tabletops
-- **Zero Setup** – Runs in GitHub Codespaces with one click
-
-## 🚀 Quick Start (60 seconds)
-
-### Option 1: Zero Dependencies (Recommended)
-```bash
-# Clone and run
-git clone https://github.com/yourusername/Ai-Dungeon-Master-.git  
-✅ **Full dice system** – Secure RNG, session replay, critical detection
-
-### Option 2: With LLM Enhancement
+git clone https://github.com/FractalFuryan/Ai-Dungeon-Master-.git
+cd Ai-Dungeon-Master-
+python -m uvicorn server.main:app --host 0.0.0.0 --port 8000
+```
+✅ **No API keys required** – Templates + dice work offline  
+✅ **Full dice system** – Secure RNG, session replay, critical detection  
+✅ **QR scanner** – Load D&D 5e and other rulesets instantly
+### Option 2: With LLM Enhancement (Optional)
 ```bash
 # Add to .env file
 NARRATION_MODE=hybrid  # or 'llm' for v1.2.0 behavior
@@ -211,7 +210,13 @@ OPENAI_API_KEY=sk-...
 ✅ **Graceful fallback** – Works offline if API unavailable  
 ✅ **Cost effective** – Templates for common actions, LLM for special moments
 
-### Option 3: Configuration Examples
+### Option 3: Roll20 Integration
+
+See [ROLL20_GUIDE.md](ROLL20_GUIDE.md) for complete Roll20 setup instructions.
+
+---
+
+## ⚙️ Configuration Examples
 
 **Pure Template Mode** (Recommended for most users)
 ```env
