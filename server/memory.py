@@ -24,8 +24,20 @@ class SessionMemory:
                 "recent_actions": [],
                 "recent_outcomes": [],
                 "turn_queue": [],
+                "turn_scores": {},
                 "active_player": None,
                 "world_flags": {},
+                "geomancer_enabled": True,
+                "geomancer": {
+                    "C": 0.0,
+                    "D": 0.0,
+                    "T": 0.0,
+                    "H": 0.0,
+                    "drift": 0.0,
+                    "equilibrium": 1.0,
+                    "instability": 0.0,
+                    "history": []
+                },
                 "session_stats": {
                     "total_actions": 0,
                     "avg_imagination": 0.0,
@@ -33,6 +45,20 @@ class SessionMemory:
                 }
             }
             logger.info(f"Created new session: {self.session_id[:8]}...")
+
+        # Backward compatibility for existing sessions created before new fields
+        mem = _MEM[self.session_id]
+        mem.setdefault("turn_scores", {})
+        mem.setdefault("geomancer_enabled", True)
+        geomancer = mem.setdefault("geomancer", {})
+        geomancer.setdefault("C", 0.0)
+        geomancer.setdefault("D", 0.0)
+        geomancer.setdefault("T", 0.0)
+        geomancer.setdefault("H", 0.0)
+        geomancer.setdefault("drift", 0.0)
+        geomancer.setdefault("equilibrium", 1.0)
+        geomancer.setdefault("instability", 0.0)
+        geomancer.setdefault("history", [])
         
         _MEM[self.session_id]["last_access"] = time.time()
     
@@ -77,9 +103,17 @@ def get_memory(session_id: str) -> dict:
     session = SessionMemory(session_id)
     return session.get()
 
-def update_memory(session_id: str, key: str, value):
-    """Legacy compatibility - updates session memory"""
+def update_memory(session_id: str, key: str, value=None):
+    """Legacy compatibility - updates session memory.
+
+    Supports both:
+    - update_memory(session_id, "key", value)
+    - update_memory(session_id, {"key": value, ...})
+    """
     session = SessionMemory(session_id)
     mem = session.get()
-    mem[key] = value
+    if isinstance(key, dict):
+        mem.update(key)
+    else:
+        mem[key] = value
 

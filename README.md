@@ -157,10 +157,12 @@ dnd5e_basic
 - **Anti-Railroading Detection** – Warns when GM forces outcomes inappropriately
 - **6 Adaptive Narrative Frames** – Story structures adapt to player creativity and risk
 - **Session Management** – Isolated campaigns with auto-cleanup
+- **Geomancer Full Mode (optional)** – Lightweight dynamic campaign state (C/D/T/H) with deterministic updates
 
 ### Roll20 Integration (Optional)
 - **GM Relay System** – No Roll20 HTTP calls, no ToS violations, no vendor lock-in
 - **Chat-based Commands** – Players type `!aidm ...`, GM pastes JSON, system responds
+- **Geomancer Controls** – `!aidm geomancer on|off|status` for optional live campaign dynamics
 - **Sandbox-Safe** – Works within Roll20's security model
 - **See [ROLL20_GUIDE.md](ROLL20_GUIDE.md)** for complete setup
 
@@ -180,11 +182,49 @@ dnd5e_basic
 1. **Players type** `!aidm ...` in Roll20 chat
 2. **GM runs** `!aidm_dump` to collect actions
 3. **GM pastes** JSON into the VoiceDM relay page
-4. **VoiceDM processes** using deterministic logic + optional randomness
+4. **VoiceDM processes** using deterministic logic + optional randomness + optional Geomancer dynamics
 5. **System returns** copy-ready narration + dice roll commands
 6. **GM pastes** back into Roll20 chat
 
 **No Roll20 HTTP calls. No ToS violations. No vendor lock-in.**
+
+### ⚔️ Geomancer Full Mode (Roll20 Edition)
+
+Geomancer is a **lightweight, deterministic, and auditable** campaign dynamics layer that remains fully Roll20-mechanics-safe.
+
+It tracks:
+
+- **C(t)**: Cooperation coherence
+- **D(t)**: Disruption pressure
+- **T(t)**: Narrative tension scalar
+- **H(t)**: Entropy (action unpredictability)
+
+And computes per-action utility:
+
+`U_i = αR_i + γC_i - βD_i`
+
+Where `R_i` is scene relevance, `C_i` is cooperative contribution, and `D_i` is destabilizing force.
+
+#### What it influences
+
+- **🎭 Tone modulation**: narration reflects unity, instability, or uncertainty
+- **⏳ Turn priority**: `myturn` queue is utility-weighted for emergent leadership
+- **📈 Campaign drift**: long-term drift accumulates from cooperative vs disruptive play
+- **⚖️ Party equilibrium/instability**: balance metrics update over time
+- **🔥 Tension escalation**: tension evolves with disruption and cooperation decay
+
+#### Commands
+
+- `!aidm geomancer status` → shows live C, D, T, H (+ drift/equilibrium/instability)
+- `!aidm geomancer on` → enables Full Mode
+- `!aidm geomancer off` → disables Full Mode
+
+#### Design guarantees
+
+- **Roll20 owns dice and sheets**
+- **No matrix-heavy computation** (lightweight updates only)
+- **Deterministic state transitions** for debugging and auditability
+- **Optional toggle** for tables that want classic behavior
 
 ---
 

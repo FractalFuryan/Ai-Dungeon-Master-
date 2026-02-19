@@ -1,4 +1,5 @@
 import logging
+import math
 from typing import Dict, Any, List
 from .memory import SessionMemory, cleanup_old_sessions
 from .character import init_character, update_from_action
@@ -9,6 +10,85 @@ from .hybrid_engine import generate_narrative  # NEW: Hybrid system
 from .config import settings
 
 logger = logging.getLogger(__name__)
+
+
+def _ensure_geomancer_state(memory: Dict[str, Any]) -> Dict[str, Any]:
+    geomancer = memory.setdefault("geomancer", {})
+    geomancer.setdefault("C", 0.0)
+    geomancer.setdefault("D", 0.0)
+    geomancer.setdefault("T", 0.0)
+    geomancer.setdefault("H", 0.0)
+    geomancer.setdefault("drift", 0.0)
+    geomancer.setdefault("equilibrium", 1.0)
+    geomancer.setdefault("instability", 0.0)
+    geomancer.setdefault("history", [])
+    memory.setdefault("geomancer_enabled", True)
+    return geomancer
+
+
+def classify_action(text: str):
+    text = text.lower()
+
+    coop_markers = ["help", "assist", "support", "together", "protect"]
+    chaos_markers = ["kill", "burn", "explode", "betray", "steal"]
+
+    C_i = sum(1 for w in coop_markers if w in text)
+    D_i = sum(1 for w in chaos_markers if w in text)
+
+    if C_i > D_i:
+        return "coop", C_i, D_i
+    if D_i > C_i:
+        return "disrupt", C_i, D_i
+    return "neutral", C_i, D_i
+
+
+def update_geomancer(mem: Dict[str, Any], text: str) -> float:
+    g = _ensure_geomancer_state(mem)
+
+    action_type, C_i, D_i = classify_action(text)
+
+    # Relevance (scene overlap)
+    scene_words = set(mem.get("scene", "").lower().split())
+    text_words = text.lower().split()
+    R_i = sum(1 for w in text_words if w in scene_words)
+
+    alpha, beta, gamma = 1.0, 1.2, 1.5
+    U = alpha * R_i + gamma * C_i - beta * D_i
+
+    # Update C and D (slow accumulation)
+    g["C"] = 0.8 * g["C"] + C_i
+    g["D"] = 0.8 * g["D"] + D_i
+
+    # Update tension
+    lambda_decay, delta_disruption, mu_coop = 0.85, 0.5, 0.4
+    g["T"] = lambda_decay * g["T"] + delta_disruption * g["D"] - mu_coop * g["C"]
+
+    # Track history for entropy
+    g["history"].append(action_type)
+    g["history"] = g["history"][-20:]
+
+    counts = {
+        "coop": g["history"].count("coop"),
+        "disrupt": g["history"].count("disrupt"),
+        "neutral": g["history"].count("neutral"),
+    }
+    total = sum(counts.values())
+    H = 0.0
+    if total > 0:
+        for v in counts.values():
+            if v > 0:
+                p = v / total
+                H -= p * math.log(p)
+    g["H"] = H
+
+    # Long-term campaign drift and party equilibrium/instability
+    eta = 0.05
+    g["drift"] += eta * (g["C"] - g["D"])
+    balance_gap = abs(g["C"] - g["D"])
+    g["equilibrium"] = 1.0 / (1.0 + balance_gap)
+    g["instability"] = max(0.0, g["D"] - g["C"]) + max(0.0, g["T"]) + g["H"]
+
+    return U
 
 def process_roll20_event(
     session_id: str,
@@ -36,6 +116,7 @@ def process_roll20_event(
     text = validation["sanitized"]
     session = SessionMemory(session_id)
     memory = session.get()
+    _ensure_geomancer_state(memory)
     
     # Handle special commands
     if text.lower().startswith("persona "):
@@ -61,15 +142,54 @@ def process_roll20_event(
             "roll": f"/roll {safe_roll}",
             "debug": {"roll_command": safe_roll}
         }
+
+    if text.lower().startswith("geomancer"):
+        parts = text.lower().split()
+        if len(parts) == 1 or parts[1] == "status":
+            geom = memory["geomancer"]
+            enabled = memory.get("geomancer_enabled", True)
+            return {
+                "chat": (
+                    f"🧭 <b>Geomancer:</b> {'ON' if enabled else 'OFF'} | "
+                    f"C={geom['C']:.2f}, D={geom['D']:.2f}, T={geom['T']:.2f}, H={geom['H']:.2f}, "
+                    f"Drift={geom['drift']:.2f}, Eq={geom['equilibrium']:.2f}, Instab={geom['instability']:.2f}"
+                ),
+                "debug": {"geomancer": geom, "geomancer_enabled": enabled}
+            }
+
+        if parts[1] in ["on", "off"]:
+            enabled = parts[1] == "on"
+            memory["geomancer_enabled"] = enabled
+            return {
+                "chat": f"🧭 <b>Geomancer Full Mode {'enabled' if enabled else 'disabled'}</b>",
+                "debug": {"geomancer_enabled": enabled}
+            }
+
+        return {
+            "chat": "⚠️ <i>Usage: geomancer [on|off|status]</i>",
+            "debug": {"invalid_geomancer_command": text}
+        }
     
     if text.lower() == "myturn":
-        # Turn management
-        if player_name not in memory["turn_queue"]:
-            memory["turn_queue"].append(player_name)
-        memory["active_player"] = player_name
+        # Utility-weighted turn management
+        turn_queue = memory.get("turn_queue", [])
+        turn_scores = memory.setdefault("turn_scores", {})
+        if player_name not in turn_queue:
+            turn_queue.append(player_name)
+
+        utility = update_geomancer(memory, text) if memory.get("geomancer_enabled", True) else 0.0
+        turn_scores[player_name] = utility
+        turn_queue = sorted(turn_queue, key=lambda p: turn_scores.get(p, 0.0), reverse=True)
+
+        memory["turn_queue"] = turn_queue
+        memory["active_player"] = turn_queue[0] if turn_queue else None
         return {
-            "chat": f"⏳ <i>{player_name}'s turn is recorded. Describe your action.</i>",
-            "debug": {"turn_queued": player_name}
+            "chat": f"<b>Turn order:</b> {', '.join(turn_queue)}",
+            "debug": {
+                "turn_queued": player_name,
+                "turn_queue": turn_queue,
+                "turn_scores": {k: round(v, 2) for k, v in turn_scores.items()}
+            }
         }
     
     if text.lower() == "scene":
@@ -86,6 +206,19 @@ def process_roll20_event(
     
     # Analyze imagination
     imagination_score, imagination_signals = analyze_imagination(text)
+
+    geom_score = None
+    if memory.get("geomancer_enabled", True):
+        geom_score = update_geomancer(memory, text)
+
+    geom = memory["geomancer"]
+    tone_modifier = ""
+    if geom["T"] > 5:
+        tone_modifier = "The world feels unstable, tension crackling in the air."
+    elif geom["C"] > geom["D"] * 2 and geom["C"] > 0:
+        tone_modifier = "The party moves with rare unity and confidence."
+    elif geom["H"] > 1.0:
+        tone_modifier = "Events feel unpredictable, the future uncertain."
     
     # Update character stats
     update_from_action(players[player_name], imagination_score, imagination_signals)
@@ -112,6 +245,7 @@ PLAYER ACTION: {text}
 PLAYER STYLE: {', '.join(imagination_signals) if imagination_signals else 'direct action'}
 FRAME: {selected_frame['name']} - {selected_frame['description']}
 FRAME HINT: {selected_frame['prompt_hint']}
+TONE MODIFIER: {tone_modifier or 'none'}
 
 {"⚠️ GM NOTE: Recent actions have shown creative variety - ensure outcomes match this creativity." if rail_analysis["detected"] else ""}
 
@@ -123,7 +257,7 @@ Write in the style of a {memory['persona']} dungeon master.
     response_text = generate_narrative(
         frame_key=selected_frame["key"],
         tone=memory["persona"],
-        scene_context=memory["scene"],
+        scene_context=f"{memory['scene']}\n\n{tone_modifier}" if tone_modifier else memory["scene"],
         player_action=text,
         imagination_signals=imagination_signals
     )
@@ -140,6 +274,9 @@ Write in the style of a {memory['persona']} dungeon master.
     response = {
         "chat": f"<b>🎭 {selected_frame['name']}:</b> {response_text}"
     }
+
+    if tone_modifier:
+        response["chat"] += f"\n\n<i>{tone_modifier}</i>"
     
     # Add debug info for GM
     debug_info = {
@@ -150,7 +287,16 @@ Write in the style of a {memory['persona']} dungeon master.
         "player_momentum": round(player_momentum, 2),
         "rail_detected": rail_analysis["detected"],
         "session_actions": memory["session_stats"]["total_actions"],
-        "avg_imagination": round(memory["session_stats"]["avg_imagination"], 2)
+        "avg_imagination": round(memory["session_stats"]["avg_imagination"], 2),
+        "geomancer_enabled": memory.get("geomancer_enabled", True),
+        "geomancer_utility": round(geom_score, 2) if geom_score is not None else None,
+        "geomancer_C": round(geom["C"], 2),
+        "geomancer_D": round(geom["D"], 2),
+        "geomancer_T": round(geom["T"], 2),
+        "geomancer_H": round(geom["H"], 2),
+        "geomancer_drift": round(geom["drift"], 2),
+        "geomancer_equilibrium": round(geom["equilibrium"], 2),
+        "geomancer_instability": round(geom["instability"], 2)
     }
     
     if rail_analysis["detected"]:
