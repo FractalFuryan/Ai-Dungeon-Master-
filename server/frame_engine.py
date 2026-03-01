@@ -54,7 +54,7 @@ FRAME_LIBRARY = {
 
 def get_available_frames(session_memory: Dict[str, Any]) -> List[str]:
     """Get frames available based on session state"""
-    available = list(FRAME_LIBRARY.keys())
+    available = sorted(FRAME_LIBRARY.keys())
     
     # Remove recently used frames to encourage variety
     recent_outcomes = session_memory.get("recent_outcomes", [])
@@ -70,7 +70,7 @@ def select_frame(
     session_memory: Dict[str, Any],
     player_momentum: float,
     imagination_score: float,
-    rails_detected: bool
+    rails_detected: bool = False
 ) -> Dict[str, Any]:
     """
     Select the most appropriate narrative frame.
