@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>AI Dungeon Master - DM Console</title>
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body class="dm-view">
+  <div class="container">
+    <header>
+      <h1>🎲 AI Dungeon Master</h1>
+      <p class="subtitle">Create and manage your campaign</p>
+    </header>
+
+    <div id="setup-screen" class="screen active">
+      <div class="card">
+        <h2>Create New Session</h2>
+        <button id="create-session-btn" class="btn btn-primary btn-large">
+          Create Session
+        </button>
+      </div>
+    </div>
+
+    <div id="qr-screen" class="screen">
+      <div class="card">
+        <h2>Session Created!</h2>
+        <div id="qr-container">
+          <img id="qr-code" alt="QR Code for session">
+        </div>
+        <div class="session-info">
+          <p><strong>Session ID:</strong> <span id="session-id"></span></p>
+          <p><strong>Join URL:</strong></p>
+          <input type="text" id="join-url" readonly>
+          <button id="copy-url-btn" class="btn btn-secondary">Copy URL</button>
+        </div>
+        <div class="player-count">
+          <p>Players Connected: <span id="player-count">0</span></p>
+        </div>
+        <button id="start-session-btn" class="btn btn-primary">
+          Start Campaign
+        </button>
+      </div>
+    </div>
+
+    <div id="campaign-screen" class="screen">
+      <div class="dm-controls">
+        <div class="card">
+          <h3>Players</h3>
+          <div id="players-list"></div>
+        </div>
+        
+        <div class="card">
+          <h3>Quick Actions</h3>
+          <div class="quick-actions">
+            <button class="btn btn-secondary" onclick="rollDice('1d20')">Roll d20</button>
+            <button class="btn btn-secondary" onclick="rollDice('2d6')">Roll 2d6</button>
+            <button class="btn btn-secondary" onclick="rollDice('1d100')">Roll d100</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="narration-panel">
+        <div class="card">
+          <h3>Campaign Log</h3>
+          <div id="campaign-log"></div>
+        </div>
+
+        <div class="card">
+          <h3>DM Narration</h3>
+          <div class="voice-controls">
+            <button id="dm-voice-btn" class="btn btn-voice">
+              <span class="voice-icon">🎤</span>
+              <span class="voice-text">Hold to Narrate</span>
+            </button>
+          </div>
+          <div class="narration-text">
+            <textarea id="dm-text-input" placeholder="Type narration here..." rows="3"></textarea>
+            <button id="send-narration-btn" class="btn btn-primary">Send Narration</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="/dm.js"></script>
+</body>
+</html>

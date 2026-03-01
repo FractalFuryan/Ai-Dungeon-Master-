@@ -1,0 +1,22 @@
+{
+  "name": "ai-dungeon-master",
+  "version": "1.0.0",
+  "description": "Voice-driven AI Dungeon Master with multiplayer support via QR code",
+  "main": "server/index.js",
+  "type": "module",
+  "scripts": {
+    "start": "node server/index.js",
+    "dev": "node --watch server/index.js",
+    "test": "echo \"No tests specified\" && exit 0"
+  },
+  "keywords": ["ai", "dungeon-master", "dnd", "voice", "websocket", "multiplayer"],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.18.2",
+    "socket.io": "^4.6.1",
+    "qrcode": "^1.5.3",
+    "uuid": "^9.0.0",
+    "openai": "^4.20.0"
+  }
+}
