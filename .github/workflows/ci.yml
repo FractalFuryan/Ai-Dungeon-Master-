@@ -207,10 +207,10 @@ jobs:
           print(f'✅ {frame_name:20s} wonder={wonder:.1f} risk={risk:.1f}')
 
         random.seed(42)
-          frame1 = select_frame({"recent_outcomes": []}, 0.5, 0.7, False)
-          random.seed(42)
-          frame2 = select_frame({"recent_outcomes": []}, 0.5, 0.7, False)
-          assert frame1["key"] == frame2["key"], f'Frame selection not deterministic: {frame1["key"]} != {frame2["key"]}'
+        frame1 = select_frame({"recent_outcomes": []}, 0.5, 0.7, False)
+        random.seed(42)
+        frame2 = select_frame({"recent_outcomes": []}, 0.5, 0.7, False)
+        assert frame1["key"] == frame2["key"], f'Frame selection not deterministic: {frame1["key"]} != {frame2["key"]}'
 
         print('✅ All frame scoring verified and selection is deterministic')
         PY
