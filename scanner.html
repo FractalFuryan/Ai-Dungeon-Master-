@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VoiceDM Rule Scanner</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+            background: #0f172a;
+            color: #f8fafc;
+            padding: 20px;
+            min-height: 100vh;
+        }
+        .container { max-width: 600px; margin: 0 auto; }
+        .header { text-align: center; margin-bottom: 30px; }
+        .header h1 { 
+            font-size: 2rem; 
+            margin-bottom: 10px;
+            background: linear-gradient(90deg, #60a5fa, #a78bfa);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+        .card {
+            background: rgba(30, 41, 59, 0.8);
+            border-radius: 12px;
+            padding: 25px;
+            margin-bottom: 20px;
+            border: 1px solid #475569;
+        }
+        .video-container {
+            position: relative;
+            width: 100%;
+            height: 300px;
+            border-radius: 8px;
+            overflow: hidden;
+            background: #000;
+            margin-bottom: 15px;
+        }
+        #scanner-video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .scan-frame {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 200px;
+            height: 200px;
+            border: 3px solid #60a5fa;
+            border-radius: 8px;
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+        .btn {
+            padding: 12px 24px;
+            border-radius: 8px;
+            border: none;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            width: 100%;
+            margin-top: 15px;
+            font-size: 1rem;
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+            color: white;
+        }
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(59, 130, 246, 0.3);
+        }
+        .btn-secondary {
+            background: #475569;
+            color: white;
+        }
+        .btn-secondary:hover {
+            background: #5a6b7f;
+        }
+        input {
+            width: 100%;
+            padding: 12px;
+            border-radius: 6px;
+            border: 1px solid #475569;
+            background: #1e293b;
+            color: white;
+            margin-bottom: 10px;
+            font-size: 1rem;
+        }
+        input::placeholder {
+            color: #94a3b8;
+        }
+        .result {
+            display: none;
+            padding: 20px;
+            background: rgba(16, 185, 129, 0.1);
+            border-radius: 8px;
+            border: 1px solid #10b981;
+            margin-top: 20px;
+        }
+        .result.active { 
+            display: block;
+            animation: fadeIn 0.5s ease;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .rules-list { margin-top: 15px; }
+        .rule-item {
+            background: rgba(15, 23, 42, 0.6);
+            padding: 15px;
+            margin-bottom: 10px;
+            border-radius: 6px;
+            border-left: 3px solid #60a5fa;
+        }
+        .rule-item strong {
+            color: #e2e8f0;
+            font-size: 1.1rem;
+        }
+        .rule-item small {
+            color: #94a3b8;
+            display: block;
+            margin-top: 5px;
+        }
+        .rule-category {
+            color: #a78bfa;
+            font-size: 1.2rem;
+            margin-top: 20px;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .error {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid #ef4444;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 15px;
+            display: none;
+        }
+        .error.active { display: block; }
+        .info { color: #94a3b8; font-size: 0.9rem; margin-top: 5px; }
+        .quick-load {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 10px;
+            margin-top: 15px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📚 VoiceDM Rule Scanner</h1>
+            <p class="info">Scan QR codes to load rules into your AI Dungeon Master</p>
+        </div>
+        
+        <div class="card">
+            <h2 style="margin-bottom: 15px;">Quick Load Rulesets</h2>
+            <div class="quick-load">
+                <button class="btn btn-primary" onclick="loadRuleset('dnd5e_basic')">
+                    🐉 Load D&D 5e Basic Rules
+                </button>
+                <button class="btn btn-secondary" onclick="loadRuleset('pathfinder_core')">
+                    📖 Load Pathfinder Core (Coming Soon)
+                </button>
+            </div>
+        </div>
+        
+        <div class="card">
+            <h2 style="margin-bottom: 15px;">Scan QR Code</h2>
+            <p class="info" style="margin-bottom: 20px;">
+                Point your camera at a VoiceDM rule QR code to load the ruleset.
+            </p>
+            
+            <div style="position: relative;">
+                <div class="video-container">
+                    <video id="scanner-video" playsinline autoplay></video>
+                    <div class="scan-frame"></div>
+                </div>
+                <div style="text-align: center; color: #94a3b8; font-size: 0.9rem;">
+                    Position QR code within the frame
+                </div>
+            </div>
+            
+            <button id="start-btn" class="btn btn-primary">📷 Start Camera</button>
+            <button id="stop-btn" class="btn btn-secondary" style="display: none;">
+                ⏹️ Stop Camera
+            </button>
+        </div>
+        
+        <div class="card">
+            <h2 style="margin-bottom: 15px;">Or Enter Manually</h2>
+            <input type="text" id="qr-input" placeholder="voicedm://rules/dnd5e/basic">
+            <button id="load-btn" class="btn btn-secondary">
+                🔄 Load Ruleset
+            </button>
+        </div>
+        
+        <div id="result" class="result">
+            <h3>✅ Ruleset Loaded!</h3>
+            <div id="ruleset-info"></div>
+            <div class="rules-list" id="rules-list"></div>
+            <button id="use-btn" class="btn btn-primary" style="margin-top: 15px;">
+                🎮 Use This Ruleset in VoiceDM
+            </button>
+        </div>
+        
+        <div id="error" class="error">
+            <h3>❌ Error</h3>
+            <p id="error-message"></p>
+        </div>
+    </div>
+
+    <script>
+        // Elements
+        const video = document.getElementById('scanner-video');
+        const startBtn = document.getElementById('start-btn');
+        const stopBtn = document.getElementById('stop-btn');
+        const qrInput = document.getElementById('qr-input');
+        const loadBtn = document.getElementById('load-btn');
+        const resultDiv = document.getElementById('result');
+        const rulesetInfo = document.getElementById('ruleset-info');
+        const rulesList = document.getElementById('rules-list');
+        const useBtn = document.getElementById('use-btn');
+        const errorDiv = document.getElementById('error');
+        const errorMsg = document.getElementById('error-message');
+        
+        let cameraActive = false;
+        let currentRuleset = null;
+        
+        // Start camera for QR scanning
+        startBtn.addEventListener('click', async () => {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({
+                    video: { facingMode: 'environment' }
+                });
+                
+                video.srcObject = stream;
+                await video.play();
+                cameraActive = true;
+                startBtn.style.display = 'none';
+                stopBtn.style.display = 'block';
+                
+                console.log('Camera started - QR scanning ready');
+                
+            } catch (err) {
+                showError('Could not access camera: ' + err.message);
+            }
+        });
+        
+        // Stop camera
+        stopBtn.addEventListener('click', () => {
+            if (video.srcObject) {
+                video.srcObject.getTracks().forEach(track => track.stop());
+                video.srcObject = null;
+                cameraActive = false;
+                startBtn.style.display = 'block';
+                stopBtn.style.display = 'none';
+            }
+        });
+        
+        // Load rules manually
+        loadBtn.addEventListener('click', () => {
+            const qrData = qrInput.value.trim();
+            if (qrData) {
+                loadRuleset(qrData);
+            }
+        });
+        
+        // Load rules from QR data or name
+        async function loadRuleset(qrData) {
+            try {
+                // Try to call backend API
+                const response = await fetch('/api/scanner/load', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({qr_data: qrData})
+                });
+                
+                if (response.ok) {
+                    const ruleset = await response.json();
+                    displayRuleset(ruleset);
+                } else {
+                    // Fallback to mock data for demo
+                    const mockRuleset = getMockRuleset(qrData);
+                    if (mockRuleset) {
+                        displayRuleset(mockRuleset);
+                    } else {
+                        throw new Error('Ruleset not found');
+                    }
+                }
+                
+            } catch (err) {
+                showError('Failed to load ruleset: ' + err.message);
+            }
+        }
+        
+        // Display loaded ruleset
+        function displayRuleset(ruleset) {
+            currentRuleset = ruleset;
+            
+            // Display info
+            rulesetInfo.innerHTML = `
+                <h4 style="color: #e2e8f0; margin-bottom: 5px;">${ruleset.name} v${ruleset.version}</h4>
+                <p style="color: #94a3b8; margin-bottom: 10px;">${ruleset.description}</p>
+                <small style="color: #64748b;">Source: ${ruleset.source}</small>
+            `;
+            
+            // Display rules by category
+            let rulesHtml = '';
+            for (const [category, rules] of Object.entries(ruleset.rules)) {
+                rulesHtml += `<h4 class="rule-category">${category}</h4>`;
+                rules.forEach(rule => {
+                    rulesHtml += `
+                        <div class="rule-item">
+                            <strong>${rule.name}</strong>
+                            <small>${rule.description || rule.formula || ''}</small>
+                        </div>
+                    `;
+                });
+            }
+            
+            rulesList.innerHTML = rulesHtml;
+            resultDiv.classList.add('active');
+            errorDiv.classList.remove('active');
+        }
+        
+        // Mock ruleset for demo
+        function getMockRuleset(name) {
+            if (name.includes('dnd5e') || name === 'dnd5e_basic') {
+                return {
+                    name: "D&D 5e Basic Rules",
+                    version: "1.0",
+                    description: "Core combat and skill rules for D&D 5th Edition",
+                    source: "D&D 5e SRD",
+                    rules: {
+                        combat: [
+                            { name: "Attack Roll", description: "Roll d20 + ability modifier + proficiency bonus" },
+                            { name: "Damage Roll", description: "Roll weapon damage + ability modifier" },
+                            { name: "Critical Hit", description: "Natural 20 doubles all damage dice" }
+                        ],
+                        skills: [
+                            { name: "Ability Check", description: "Roll d20 + ability modifier" },
+                            { name: "Advantage", description: "Roll 2d20, take highest" },
+                            { name: "Disadvantage", description: "Roll 2d20, take lowest" }
+                        ],
+                        spells: [
+                            { name: "Spell Attack", description: "Roll d20 + spellcasting mod + proficiency" },
+                            { name: "Spell Save DC", formula: "8 + proficiency + spellcasting mod" }
+                        ]
+                    }
+                };
+            }
+            return null;
+        }
+        
+        // Use the ruleset in VoiceDM
+        useBtn.addEventListener('click', () => {
+            if (currentRuleset) {
+                // Store in localStorage
+                localStorage.setItem('voicedm_ruleset', JSON.stringify(currentRuleset));
+                
+                // Redirect to main app
+                alert('Ruleset loaded! Redirecting to VoiceDM...');
+                window.location.href = '/?ruleset=' + encodeURIComponent(currentRuleset.name);
+            }
+        });
+        
+        function showError(message) {
+            errorMsg.textContent = message;
+            errorDiv.classList.add('active');
+            resultDiv.classList.remove('active');
+        }
+        
+        // Auto-load demo rules on page load
+        setTimeout(() => {
+            loadRuleset('dnd5e_basic');
+        }, 500);
+    </script>
+</body>
+</html>

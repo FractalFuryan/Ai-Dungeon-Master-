@@ -1,0 +1,137 @@
+# Roll20 Macro Examples for AI Dungeon Master
+
+These macros speed up common commands. Copy-paste into Roll20 Macro bar.
+
+## Player Macros
+
+### Quick Action
+**Name:** AI Action
+**Macro:**
+```
+!aidm ?{What do you do?}
+```
+
+### Request Turn
+**Name:** My Turn
+**Macro:**
+```
+!aidm myturn
+```
+
+### Quick Skill Check (with token selection)
+**Name:** Skill Check
+**Macro:**
+```
+!aidm roll ?{Skill|perception|stealth|athletics|investigation}
+```
+
+### Persona Quick-Switch (GM only)
+**Name:** Change Mood
+**Macro:**
+```
+!aidm persona ?{DM Persona|classic|gothic|whimsical|cosmic|noir|tavern}
+```
+
+### Common Actions (create separate macros or use dropdown)
+**Name:** Quick Actions
+**Macro:**
+```
+!aidm ?{Choose Action|I search the room|I listen carefully|I ready my weapon|I examine it closely|I try to hide}
+```
+
+## GM Macros
+
+### Process Queue
+**Name:** [GM] Dump Queue
+**Macro:**
+```
+!aidm_dump
+```
+*Copy the whispered JSON to relay page*
+
+### Clear Queue (Emergency)
+**Name:** [GM] Clear Queue
+**Macro:**
+```
+!aidm_clear
+```
+
+### Advance Turn
+**Name:** [GM] Next Turn
+**Macro:**
+```
+!aidm next
+```
+
+### Help Reference
+**Name:** AI DM Help
+**Macro:**
+```
+!aidm help
+```
+
+## Advanced Macros
+
+### Combat Action with Roll
+**Name:** Attack
+**Macro:**
+```
+!aidm I attack with my ?{Weapon|sword|bow|staff|dagger}
+!aidm roll attack
+```
+*Note: Executes two commands. May need to be split.*
+
+### Contextual Investigation
+**Name:** Investigate
+**Macro:**
+```
+!aidm I carefully examine the ?{Target|door|chest|body|altar|bookshelf}
+!aidm roll investigation
+```
+
+### Quick Persona Samples (for testing)
+**Name:** [GM] Test Personas
+**Macro:**
+```
+!aidm persona classic
+!aidm The heroes gather in the tavern
+```
+*Change persona and send test narration*
+
+## Tips
+
+- **Bar 1:** Player actions (Quick Action, My Turn, Skill Check)
+- **Bar 2:** GM controls (Dump Queue, Next Turn, Persona)
+- **Token Macros:** Attach skill checks to character sheets
+- **Visibility:** Make player macros visible to all, GM macros visible to GM only
+
+## Custom Prompt Templates
+
+For more immersive actions, create macros with narrative templates:
+
+### Stealth Approach
+```
+!aidm I move silently toward the ?{Target}, staying in the shadows and watching for ?{Threat|guards|traps|movement}
+```
+
+### Social Interaction
+```
+!aidm I approach ?{NPC} and try to ?{Action|persuade|intimidate|deceive|charm} them about ?{Topic}
+```
+
+### Spellcasting
+```
+!aidm I cast ?{Spell} targeting ?{Target}, focusing my energy on ?{Intent}
+```
+
+## Troubleshooting Macros
+
+If macros aren't working:
+- Ensure API script is running (Settings → API Scripts)
+- Check for typos in `!aidm` command
+- Verify token selection for roll commands
+- Make sure queries (`?{...}`) have no nested quotes
+
+## Share Your Macros
+
+Found a great macro pattern? Share it in [GitHub Discussions](https://github.com/FractalFuryan/Ai-Dungeon-Master-/discussions)!

@@ -1,0 +1,25 @@
+# Core Framework
+fastapi>=0.104.1
+uvicorn[standard]>=0.24.0
+pydantic>=2.5.0
+python-dotenv>=1.0.0
+pydantic-settings>=2.1.0
+
+# WebSocket Support
+websockets==12.0
+
+# Static Files (required for StaticFiles in production)
+aiofiles==23.2.1
+
+# AI & TTS
+openai>=1.3.0
+
+# QR Code Generation
+qrcode[pil]==7.4.2
+pillow==11.0.0
+
+# Database
+# SQLite is built into Python, no additional package needed
+
+# Optional (can be removed if not using Redis)
+# redis==5.0.1

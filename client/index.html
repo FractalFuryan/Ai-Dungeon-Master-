@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Dungeon Master</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <style>
+        body { font-family: sans-serif; padding: 20px; background: #111; color: #eee; }
+        button { padding: 15px; font-size: 18px; margin: 10px; }
+        #push-to-talk { padding: 30px; font-size: 24px; background: #333; border: 3px solid #666; border-radius: 50%; }
+        #qr-code { margin: 20px; text-align: center; }
+        .narration { padding: 10px; margin: 5px; background: #222; border-left: 4px solid #a33; }
+        .whisper { padding: 10px; margin: 5px; background: #1a1a1a; color: #999; border-left: 4px solid #666; font-size: 0.9em; }
+        .system { padding: 10px; margin: 5px; background: #1a2a1a; border-left: 4px solid #4a4; color: #8f8; font-size: 0.95em; }
+        #persona-controls { margin: 20px 0; display: none; }
+        #persona-select { padding: 8px; font-size: 16px; }
+        #turn-display { margin: 20px 0; padding: 15px; background: #222; border-radius: 8px; text-align: center; border: 2px solid #666; }
+        #turn-display strong { color: #ff8; }
+        #active-player { font-weight: bold; color: #f0a; }
+        #pass-turn { display: none; padding: 10px 20px; margin: 10px; background: #840; }
+    </style>
+</head>
+<body>
+    <h1>⚔️ AI Dungeon Master</h1>
+    <p id="status">Create or join a session</p>
+    
+    <button id="create-session">Create New Session</button>
+    
+    <div id="qr-code"></div>
+    
+    <div id="persona-controls">
+        <label for="persona-select"><strong>🎭 DM Persona:</strong></label>
+        <select id="persona-select">
+            <option value="classic">Classic Fantasy DM</option>
+            <option value="dark">Gothic Horror Master</option>
+            <option value="whimsical">Whimsical Storyteller</option>
+            <option value="scifi">Sci-Fi Overseer</option>
+        </select>
+    </div>
+    
+    <div id="turn-display">
+        <strong>Current Turn:</strong> <span id="active-player">Free — anyone can speak</span><br>
+        <small>Queue: <span id="turn-queue">none</span></small>
+    </div>
+    
+    <button id="pass-turn">⏭️ Pass Turn</button>
+    
+    <div id="campaign-controls" style="margin: 20px 0; display: none;">
+        <input type="text" id="campaign-name" placeholder="Campaign name (for save)" style="padding: 8px; margin: 5px; width: 200px;">
+        <button id="save-campaign">💾 Save Campaign</button>
+        <button id="load-campaign">📂 Load Campaign</button>
+    </div>
+    
+    <div id="log" style="margin-top: 30px;"></div>
+    
+    <button id="push-to-talk">🎤 Hold to Speak</button>
+    
+    <script src="app.js"></script>
+</body>
+</html>

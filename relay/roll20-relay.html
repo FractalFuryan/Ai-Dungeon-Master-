@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI DM Roll20 Relay</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      max-width: 900px;
+      margin: 40px auto;
+      padding: 20px;
+      background: #1a1a1a;
+      color: #e0e0e0;
+    }
+    h1 {
+      color: #8B4513;
+      border-bottom: 2px solid #8B4513;
+      padding-bottom: 10px;
+    }
+    .config {
+      background: #2a2a2a;
+      padding: 15px;
+      border-radius: 5px;
+      margin-bottom: 20px;
+    }
+    label {
+      display: block;
+      margin-bottom: 5px;
+      color: #aaa;
+    }
+    input, textarea {
+      width: 100%;
+      padding: 8px;
+      background: #333;
+      border: 1px solid #555;
+      color: #fff;
+      border-radius: 3px;
+      font-family: monospace;
+    }
+    button {
+      background: #8B4513;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      cursor: pointer;
+      border-radius: 5px;
+      font-size: 16px;
+      margin-top: 10px;
+    }
+    button:hover {
+      background: #a0522d;
+    }
+    button:disabled {
+      background: #555;
+      cursor: not-allowed;
+    }
+    #log {
+      background: #0d0d0d;
+      padding: 15px;
+      border-radius: 5px;
+      min-height: 200px;
+      max-height: 400px;
+      overflow-y: auto;
+      font-family: monospace;
+      font-size: 12px;
+      line-height: 1.5;
+      white-space: pre-wrap;
+      border: 1px solid #444;
+    }
+    .response-box {
+      background: #2a2a2a;
+      padding: 15px;
+      border-radius: 5px;
+      margin-top: 15px;
+      border-left: 4px solid #8B4513;
+    }
+    .response-box h3 {
+      margin-top: 0;
+      color: #8B4513;
+    }
+    .copy-btn {
+      background: #4a5568;
+      padding: 5px 10px;
+      font-size: 12px;
+      margin-left: 10px;
+    }
+    .copy-btn:hover {
+      background: #5a6578;
+    }
+    .status {
+      display: inline-block;
+      padding: 3px 8px;
+      border-radius: 3px;
+      font-size: 11px;
+      margin-left: 10px;
+    }
+    .status.ok { background: #2d5016; color: #7bc043; }
+    .status.error { background: #5c1a1a; color: #ff6b6b; }
+    .status.working { background: #5c4a1a; color: #ffd93d; }
+  </style>
+</head>
+<body>
+  <h1>🎲 AI Dungeon Master – Roll20 Relay</h1>
+  
+  <div class="config">
+    <label for="backend-url">Backend URL:</label>
+    <input 
+      type="text" 
+      id="backend-url" 
+      placeholder="https://your-deployed-backend.com"
+      value="http://localhost:8000"
+    />
+    <small style="color: #888;">Change this to your deployed backend URL (e.g., Render, Fly.io)</small>
+  </div>
+
+  <div class="config">
+    <label for="queue-input">Paste AIDM_QUEUE JSON here:</label>
+    <textarea 
+      id="queue-input" 
+      rows="8" 
+      placeholder='AIDM_QUEUE:[{"campaign_id":"...","player_name":"...","text":"..."}]'
+    ></textarea>
+    <button id="process-btn" onclick="processDump()">Process Queue</button>
+    <button onclick="clearLog()" class="copy-btn">Clear Log</button>
+  </div>
+
+  <div id="responses"></div>
+
+  <h3>Activity Log <span id="status" class="status ok">Ready</span></h3>
+  <div id="log">Waiting for commands…</div>
+
+  <script>
+    const log = document.getElementById('log');
+    const statusEl = document.getElementById('status');
+    const responsesEl = document.getElementById('responses');
+    const processBtn = document.getElementById('process-btn');
+
+    function addLog(message, type = 'info') {
+      const timestamp = new Date().toLocaleTimeString();
+      const prefix = type === 'error' ? '❌' : type === 'success' ? '✅' : '→';
+      log.textContent += `[${timestamp}] ${prefix} ${message}\n`;
+      log.scrollTop = log.scrollHeight;
+    }
+
+    function setStatus(text, type) {
+      statusEl.textContent = text;
+      statusEl.className = `status ${type}`;
+    }
+
+    function clearLog() {
+      log.textContent = 'Log cleared.\n';
+      responsesEl.innerHTML = '';
+    }
+
+    async function sendToBackend(payload) {
+      const url = document.getElementById('backend-url').value.trim();
+      if (!url) {
+        throw new Error('Backend URL not configured');
+      }
+
+      const endpoint = `${url}/roll20/command`;
+      
+      const response = await fetch(endpoint, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
+
+      return response.json();
+    }
+
+    function copyToClipboard(text) {
+      navigator.clipboard.writeText(text).then(() => {
+        addLog('Copied to clipboard', 'success');
+      });
+    }
+
+    function addResponseBox(playerName, text, result) {
+      const box = document.createElement('div');
+      box.className = 'response-box';
+      
+      let content = `<h3>${playerName}: "${text}"</h3>`;
+      
+      if (result.chat) {
+        content += `<p><strong>Narration (paste into Roll20 chat):</strong></p>`;
+        content += `<pre>${result.chat}</pre>`;
+        content += `<button class="copy-btn" onclick="copyToClipboard(\`${result.chat.replace(/`/g, '\\`')}\`)">Copy Chat</button>`;
+      }
+      
+      if (result.roll) {
+        content += `<p><strong>Roll Command (paste into Roll20):</strong></p>`;
+        content += `<pre>${result.roll}</pre>`;
+        content += `<button class="copy-btn" onclick="copyToClipboard(\`${result.roll.replace(/`/g, '\\`')}\`)">Copy Roll</button>`;
+      }
+      
+      if (result.whisper) {
+        content += `<p><strong>Whisper (GM only):</strong></p>`;
+        content += `<pre>${result.whisper}</pre>`;
+      }
+      
+      box.innerHTML = content;
+      responsesEl.insertBefore(box, responsesEl.firstChild);
+    }
+
+    async function processDump() {
+      const input = document.getElementById('queue-input').value.trim();
+      
+      if (!input) {
+        addLog('No input provided', 'error');
+        return;
+      }
+
+      // Extract JSON from AIDM_QUEUE: prefix if present
+      let jsonStr = input;
+      if (input.startsWith('AIDM_QUEUE:')) {
+        jsonStr = input.substring(11);
+      }
+
+      let events;
+      try {
+        events = JSON.parse(jsonStr);
+      } catch (e) {
+        addLog(`JSON parse error: ${e.message}`, 'error');
+        setStatus('Parse Error', 'error');
+        return;
+      }
+
+      if (!Array.isArray(events)) {
+        addLog('Input must be an array of events', 'error');
+        setStatus('Invalid Format', 'error');
+        return;
+      }
+
+      processBtn.disabled = true;
+      setStatus('Processing…', 'working');
+      addLog(`Processing ${events.length} command(s)…`);
+
+      for (let i = 0; i < events.length; i++) {
+        const evt = events[i];
+        addLog(`[${i + 1}/${events.length}] ${evt.player_name}: ${evt.text}`);
+
+        try {
+          const result = await sendToBackend(evt);
+          addLog(`Response received for ${evt.player_name}`, 'success');
+          addResponseBox(evt.player_name, evt.text, result);
+        } catch (e) {
+          addLog(`Error: ${e.message}`, 'error');
+          setStatus('Error', 'error');
+        }
+
+        // Small delay between requests
+        if (i < events.length - 1) {
+          await new Promise(r => setTimeout(r, 500));
+        }
+      }
+
+      processBtn.disabled = false;
+      setStatus('Ready', 'ok');
+      addLog('Queue processing complete', 'success');
+      document.getElementById('queue-input').value = '';
+    }
+
+    // Make copyToClipboard available globally
+    window.copyToClipboard = copyToClipboard;
+    
+    addLog('Relay page loaded and ready');
+  </script>
+</body>
+</html>
