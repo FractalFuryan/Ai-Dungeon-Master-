@@ -22,13 +22,8 @@ def detect_railroading(actions: List[str], outcomes: List[str], threshold: int =
     # High action variety with low outcome variety suggests railroading
     action_variety = unique_actions / threshold
     outcome_variety = unique_outcomes / threshold
-
-    # Outcome collapse: how much action diversity collapsed into fewer outcomes.
-    # Range [0.0, 1.0]: 1.0 = total collapse (all unique actions → 1 outcome).
-    if unique_actions > 0:
-        confidence = max(0.0, 1.0 - (unique_outcomes / unique_actions))
-    else:
-        confidence = 0.0
+    
+    confidence = max(0, (action_variety - outcome_variety) / action_variety) if action_variety > 0 else 0.0
     
     if confidence > 0.3:
         warning = (

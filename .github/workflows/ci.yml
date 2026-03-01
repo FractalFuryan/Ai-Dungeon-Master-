@@ -245,12 +245,12 @@ jobs:
         print('📊 Template Library Statistics:')
         print(f'   Frames: {stats["frames"]}')
         print(f'   Tones: {stats["tones"]}')
-        print(f'   Total Variations: {stats["total_variations"]}')
-        print(f'   Estimated Outputs: {stats["estimated_outputs"]}')
+        print(f'   Total Variations: {stats["total_text_variations"]}')
+        print(f'   Estimated Outputs: {stats["estimated_unique_outputs"]}')
 
         assert stats['frames'] >= 6, f'Expected at least 6 frames, got {stats["frames"]}'
         assert stats['tones'] >= 20, f'Expected at least 20 tone combinations, got {stats["tones"]}'
-        assert stats['total_variations'] >= 256, f'Expected at least 256 variations, got {stats["total_variations"]}'
+        assert stats['total_text_variations'] >= 256, f'Expected at least 256 variations, got {stats["total_text_variations"]}'
 
         print('✅ Template coverage meets requirements')
 
