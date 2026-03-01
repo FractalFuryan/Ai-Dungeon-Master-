@@ -23,7 +23,7 @@ def detect_railroading(actions: List[str], outcomes: List[str], threshold: int =
     action_variety = unique_actions / threshold
     outcome_variety = unique_outcomes / threshold
     
-    confidence = (action_variety - outcome_variety) * 0.8
+    confidence = max(0, (action_variety - outcome_variety) / action_variety) if action_variety > 0 else 0.0
     
     if confidence > 0.3:
         warning = (
