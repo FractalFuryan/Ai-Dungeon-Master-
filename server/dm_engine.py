@@ -8,6 +8,9 @@ from .frame_engine import select_frame, FRAME_LIBRARY
 from .ethics import detect_railroading, validate_player_input
 from .hybrid_engine import generate_narrative  # NEW: Hybrid system
 from .config import settings
+from .world_engine import WorldEngine
+from .faction_engine import FactionEngine
+from .npc_engine import NPCEngine
 
 logger = logging.getLogger(__name__)
 
@@ -212,6 +215,32 @@ def process_roll20_event(
         geom_score = update_geomancer(memory, text)
 
     geom = memory["geomancer"]
+
+    # World graph propagation (factions + NPC autonomy hooks)
+    world_graph = memory.setdefault("world_graph", {})
+    world_engine = WorldEngine(world_graph)
+    faction_engine = FactionEngine(world_graph)
+    npc_engine = NPCEngine(world_graph)
+
+    action_type, _, _ = classify_action(text)
+    event = {
+        "player": player_name,
+        "action_text": text,
+        "action_type": action_type,
+        "location": memory.get("scene", "").lower(),
+        "C": geom["C"],
+        "D": geom["D"],
+        "T": geom["T"],
+        "H": geom["H"],
+    }
+    world_metrics = world_engine.apply_event(event)
+    faction_deltas = faction_engine.apply_event_impact(event)
+    faction_balance = faction_engine.update_power_balance()
+    npc_engine.record_event_memory(event)
+    npc_updates = npc_engine.recalculate_loyalties()
+    hooks = npc_engine.find_active_hooks()
+    world_graph["pending_hooks"] = hooks[:5]
+
     tone_modifier = ""
     if geom["T"] > 5:
         tone_modifier = "The world feels unstable, tension crackling in the air."
@@ -219,6 +248,10 @@ def process_roll20_event(
         tone_modifier = "The party moves with rare unity and confidence."
     elif geom["H"] > 1.0:
         tone_modifier = "Events feel unpredictable, the future uncertain."
+
+    # Faction/NPC state can enrich tone without overriding geomancer rule
+    if not tone_modifier and hooks:
+        tone_modifier = "Old loyalties are shifting; familiar faces weigh their next move."
     
     # Update character stats
     update_from_action(players[player_name], imagination_score, imagination_signals)
@@ -246,6 +279,8 @@ PLAYER STYLE: {', '.join(imagination_signals) if imagination_signals else 'direc
 FRAME: {selected_frame['name']} - {selected_frame['description']}
 FRAME HINT: {selected_frame['prompt_hint']}
 TONE MODIFIER: {tone_modifier or 'none'}
+FACTION SHIFTS: {faction_deltas[:2] if faction_deltas else 'none'}
+NPC HOOKS: {[h['description'] for h in hooks[:2]] if hooks else 'none'}
 
 {"⚠️ GM NOTE: Recent actions have shown creative variety - ensure outcomes match this creativity." if rail_analysis["detected"] else ""}
 
@@ -296,7 +331,20 @@ Write in the style of a {memory['persona']} dungeon master.
         "geomancer_H": round(geom["H"], 2),
         "geomancer_drift": round(geom["drift"], 2),
         "geomancer_equilibrium": round(geom["equilibrium"], 2),
-        "geomancer_instability": round(geom["instability"], 2)
+        "geomancer_instability": round(geom["instability"], 2),
+        "world_metrics": {
+            "cohesion": round(world_metrics.get("cohesion", 0.0), 2),
+            "disruption": round(world_metrics.get("disruption", 0.0), 2),
+            "tension": round(world_metrics.get("tension", 0.0), 2),
+            "entropy": round(world_metrics.get("entropy", 0.0), 2),
+            "drift": round(world_metrics.get("drift", 0.0), 2),
+            "equilibrium": round(world_metrics.get("equilibrium", 0.0), 2),
+            "instability": round(world_metrics.get("instability", 0.0), 2),
+        },
+        "faction_deltas": faction_deltas,
+        "faction_balance": faction_balance,
+        "npc_updates": npc_updates,
+        "pending_hooks": hooks[:5],
     }
     
     if rail_analysis["detected"]:

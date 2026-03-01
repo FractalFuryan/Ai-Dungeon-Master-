@@ -15,6 +15,10 @@ from .database import init_db, save_campaign, load_campaign, list_campaigns
 from .roll20_adapter import router
 from .config import settings
 from .scanner import scan_qr_code, get_rulesets
+from .mechanics import quick_resolve, Governors, dice
+from .map_engine import MapEngine
+from .narrative import NarrativeEngine, LegacyLedger as NarrativeLegacyLedger
+from .api import worlds, cycles, sessions as sessions_api, characters
 
 load_dotenv()
 
@@ -44,6 +48,14 @@ app.add_middleware(
 
 # Include routers
 app.include_router(router, prefix="/api/v1")
+app.include_router(worlds.router, prefix="/api/worlds", tags=["worlds"])
+app.include_router(cycles.router, prefix="/api/cycles", tags=["cycles"])
+app.include_router(sessions_api.router, prefix="/api/sessions", tags=["sessions"])
+app.include_router(characters.router, prefix="/api/characters", tags=["characters"])
+
+map_engine = MapEngine()
+narrative_engine = NarrativeEngine()
+legacy_ledger = NarrativeLegacyLedger()
 
 # === Initialize database on startup ===
 @app.on_event("startup")
@@ -270,6 +282,40 @@ async def health_check():
             "variations": narration_info["template_stats"]["total_text_variations"]
         }
     }
+
+
+@app.get("/api/health")
+async def api_health_check():
+    return {
+        "status": "healthy",
+        "dice_system": "operational",
+        "randomness_mode": dice.mode.value,
+    }
+
+
+@app.post("/api/resolve")
+async def resolve_action(
+    base_modifier: float = 0,
+    positives: list[float] | None = None,
+    negatives: list[float] | None = None,
+):
+    result = quick_resolve(base_modifier, positives or [], negatives or [])
+    return {
+        "total": result.total,
+        "rolls": result.rolls,
+        "modifier": result.modifier,
+        "natural": result.natural_roll,
+        "critical": result.is_critical,
+    }
+
+
+@app.post("/api/retirement/calculate")
+async def calculate_retirement(
+    xp: int,
+    is_underdog: bool = False,
+    is_gifted: bool = False,
+):
+    return Governors.calculate_retirement_multiplier(xp, is_underdog, is_gifted)
 
 @app.get("/stats")
 async def get_stats():

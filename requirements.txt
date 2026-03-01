@@ -20,6 +20,8 @@ pillow==11.0.0
 
 # Database
 # SQLite is built into Python, no additional package needed
+sqlalchemy>=2.0.23
+python-multipart>=0.0.6
 
 # Optional (can be removed if not using Redis)
 # redis==5.0.1

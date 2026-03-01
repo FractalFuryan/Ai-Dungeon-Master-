@@ -27,6 +27,70 @@ class SessionMemory:
                 "turn_scores": {},
                 "active_player": None,
                 "world_flags": {},
+                "world_graph": {
+                    "metrics": {
+                        "cohesion": 0.0,
+                        "disruption": 0.0,
+                        "tension": 0.0,
+                        "entropy": 0.0,
+                        "drift": 0.0,
+                        "equilibrium": 1.0,
+                        "instability": 0.0,
+                    },
+                    "factions": {
+                        "thieves_guild": {
+                            "name": "Shadow Exchange",
+                            "power": 5.0,
+                            "territory": ["docks", "market_district"],
+                            "attitude": {
+                                "players": 0.2,
+                                "city_guard": -0.7,
+                                "merchant_guild": -0.3,
+                            },
+                            "goals": ["expand_docks", "recruit_informants"],
+                            "resources": {"gold": 1000, "influence": 3},
+                        },
+                        "city_guard": {
+                            "name": "City Guard",
+                            "power": 6.0,
+                            "territory": ["gate_district", "market_district"],
+                            "attitude": {
+                                "players": 0.0,
+                                "thieves_guild": -0.6,
+                                "merchant_guild": 0.3,
+                            },
+                            "goals": ["reduce_crime", "stabilize_market_district"],
+                            "resources": {"gold": 600, "influence": 5},
+                        },
+                        "merchant_guild": {
+                            "name": "Merchant Guild",
+                            "power": 4.5,
+                            "territory": ["market_district"],
+                            "attitude": {
+                                "players": 0.1,
+                                "thieves_guild": -0.3,
+                                "city_guard": 0.4,
+                            },
+                            "goals": ["secure_trade_routes", "expand_market_district"],
+                            "resources": {"gold": 1500, "influence": 4},
+                        },
+                    },
+                    "npcs": {
+                        "elara": {
+                            "faction": "thieves_guild",
+                            "loyalty": 0.8,
+                            "trust": {"players": 0.3},
+                            "memory": [],
+                            "hooks": {
+                                "fear": "guards_discover_secret",
+                                "desire": "rise_in_guild",
+                                "debt": "owes_player_favor",
+                            },
+                        }
+                    },
+                    "pending_hooks": [],
+                    "faction_log": [],
+                },
                 "geomancer_enabled": True,
                 "geomancer": {
                     "C": 0.0,
@@ -49,6 +113,19 @@ class SessionMemory:
         # Backward compatibility for existing sessions created before new fields
         mem = _MEM[self.session_id]
         mem.setdefault("turn_scores", {})
+        world_graph = mem.setdefault("world_graph", {})
+        metrics = world_graph.setdefault("metrics", {})
+        metrics.setdefault("cohesion", 0.0)
+        metrics.setdefault("disruption", 0.0)
+        metrics.setdefault("tension", 0.0)
+        metrics.setdefault("entropy", 0.0)
+        metrics.setdefault("drift", 0.0)
+        metrics.setdefault("equilibrium", 1.0)
+        metrics.setdefault("instability", 0.0)
+        world_graph.setdefault("factions", {})
+        world_graph.setdefault("npcs", {})
+        world_graph.setdefault("pending_hooks", [])
+        world_graph.setdefault("faction_log", [])
         mem.setdefault("geomancer_enabled", True)
         geomancer = mem.setdefault("geomancer", {})
         geomancer.setdefault("C", 0.0)
