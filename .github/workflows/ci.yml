@@ -150,9 +150,7 @@ jobs:
     - name: Verify imagination scoring bounds
       run: |
         python - <<'PY'
-        import sys
-        sys.path.insert(0, 'server')
-        from resonance import analyze_imagination
+        from server.resonance import analyze_imagination
 
         test_cases = [
           ('', 0.0, 0.1),
@@ -172,9 +170,7 @@ jobs:
     - name: Verify railroading detection logic
       run: |
         python - <<'PY'
-        import sys
-        sys.path.insert(0, 'server')
-        from ethics import detect_railroading
+        from server.ethics import detect_railroading
 
         test_cases = [
           (['a', 'b', 'c'], ['x', 'x', 'x'], True),
@@ -200,9 +196,7 @@ jobs:
       run: |
         python - <<'PY'
         import random
-        import sys
-        sys.path.insert(0, 'server')
-        from frame_engine import FRAME_LIBRARY, select_frame
+        from server.frame_engine import FRAME_LIBRARY, select_frame
 
         for frame_name, frame_data in FRAME_LIBRARY.items():
           wonder = frame_data.get('wonder', 0)
@@ -213,10 +207,10 @@ jobs:
           print(f'✅ {frame_name:20s} wonder={wonder:.1f} risk={risk:.1f}')
 
         random.seed(42)
-        frame1 = select_frame({"recent_outcomes": []}, 0.5, 0.7, False)
-        random.seed(42)
-        frame2 = select_frame({"recent_outcomes": []}, 0.5, 0.7, False)
-        assert frame1["key"] == frame2["key"], f'Frame selection not deterministic: {frame1["key"]} != {frame2["key"]}'
+  frame1 = select_frame({"recent_outcomes": []}, 0.5, 0.7, False)
+  random.seed(42)
+  frame2 = select_frame({"recent_outcomes": []}, 0.5, 0.7, False)
+  assert frame1["key"] == frame2["key"], f'Frame selection not deterministic: {frame1["key"]} != {frame2["key"]}'
 
         print('✅ All frame scoring verified and selection is deterministic')
         PY
@@ -237,9 +231,7 @@ jobs:
     - name: Verify template library coverage
       run: |
         python - <<'PY'
-        import sys
-        sys.path.insert(0, 'server')
-        from template_engine import TEMPLATE_LIBRARY, get_template_stats
+        from server.template_engine import TEMPLATE_LIBRARY, get_template_stats
 
         stats = get_template_stats()
         print('📊 Template Library Statistics:')
@@ -285,24 +277,24 @@ jobs:
     - name: Verify imports
       run: |
         python - <<'PY'
+        import importlib
         import sys
-        sys.path.insert(0, 'server')
 
         modules = [
-          'config',
-          'template_engine',
-          'hybrid_engine',
-          'dm_engine',
-          'resonance',
-          'ethics',
-          'frame_engine',
-          'character',
-          'memory',
+          'server.config',
+          'server.template_engine',
+          'server.hybrid_engine',
+          'server.dm_engine',
+          'server.resonance',
+          'server.ethics',
+          'server.frame_engine',
+          'server.character',
+          'server.memory',
         ]
 
         for module in modules:
           try:
-            __import__(module)
+            importlib.import_module(module)
             print(f'✅ {module}')
           except Exception as e:
             print(f'❌ {module}: {e}')
@@ -314,9 +306,7 @@ jobs:
     - name: Start server (dry run)
       run: |
         timeout 10 python - <<'PY' || true
-        import sys
-        sys.path.insert(0, 'server')
-        from config import Settings
+        from server.config import Settings
 
         settings = Settings()
         print(f'✅ Server configured: {settings.narration_mode}')
@@ -349,35 +339,24 @@ jobs:
       run: |
         echo "🔗 Running integration tests..."
         python - <<'PY'
-        import asyncio
-        import sys
-        sys.path.insert(0, 'server')
+        from server.dm_engine import process_roll20_event
 
-        from dm_engine import process_roll20_event
+        result = process_roll20_event(
+          session_id='test-campaign',
+          player_name='TestPlayer',
+          text='I search the ancient ruins for magical artifacts',
+          selected=[],
+        )
 
+        assert 'chat' in result
+        assert isinstance(result['chat'], str)
+        assert 'debug' in result
+        assert 0.0 <= result['debug'].get('imagination_score', 0.0) <= 1.0
 
-        async def test_integration():
-          result = process_roll20_event(
-            session_id='test-campaign',
-            player_name='TestPlayer',
-            text='I search the ancient ruins for magical artifacts',
-            selected=[],
-          )
-
-          assert 'chat' in result
-          assert isinstance(result['chat'], str)
-          assert 'debug' in result
-          assert 0.0 <= result['debug'].get('imagination_score', 0.0) <= 1.0
-
-          print('✅ Integration test passed')
-          print(f'   Narrative: {result["chat"][:50]}...')
-          print(f'   Imagination: {result["debug"].get("imagination_score", 0.0):.2f}')
-          print(f'   Frame: {result["debug"].get("frame_selected", "unknown")}')
-
-          return result
-
-
-        asyncio.run(test_integration())
+        print('✅ Integration test passed')
+        print(f'   Narrative: {result["chat"][:50]}...')
+        print(f'   Imagination: {result["debug"].get("imagination_score", 0.0):.2f}')
+        print(f'   Frame: {result["debug"].get("frame_selected", "unknown")}')
         PY
 
   deployment-check:
