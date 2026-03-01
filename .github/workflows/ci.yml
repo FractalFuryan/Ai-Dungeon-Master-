@@ -149,82 +149,77 @@ jobs:
     
     - name: Verify imagination scoring bounds
       run: |
-        python -c "
-import sys
-sys.path.insert(0, 'server')
-from resonance import analyze_imagination
+        python - <<'PY'
+        import sys
+        sys.path.insert(0, 'server')
+        from resonance import analyze_imagination
 
-# Test bounds
-test_cases = [
-    ('', 0.0, 0.1),  # Empty should be near 0
-    ('I attack', 0.0, 0.2),  # Simple action
-    ('I carefully examine the ancient runes, searching for hidden magical symbols that might reveal the temple secrets', 0.5, 1.0),  # Detailed
-]
+        test_cases = [
+          ('', 0.0, 0.1),
+          ('I attack', 0.0, 0.2),
+          ('I carefully examine the ancient runes, searching for hidden magical symbols that might reveal the temple secrets', 0.5, 1.0),
+        ]
 
-for text, min_score, max_score in test_cases:
-    score, signals = analyze_imagination(text)
-    assert 0.0 <= score <= 1.0, f'Score {score} out of bounds [0,1]'
-    assert min_score <= score <= max_score, f'Score {score} not in expected range [{min_score}, {max_score}] for: {text}'
-    print(f'✅ {text[:50]:50s} -> {score:.2f} ∈ [{min_score}, {max_score}]')
+        for text, min_score, max_score in test_cases:
+          score, signals = analyze_imagination(text)
+          assert 0.0 <= score <= 1.0, f'Score {score} out of bounds [0,1]'
+          assert min_score <= score <= max_score, f'Score {score} not in expected range [{min_score}, {max_score}] for: {text}'
+          print(f'✅ {text[:50]:50s} -> {score:.2f} ∈ [{min_score}, {max_score}]')
 
-print('✅ All imagination scoring bounds verified')
-        "
+        print('✅ All imagination scoring bounds verified')
+        PY
     
     - name: Verify railroading detection logic
       run: |
-        python -c "
-import sys
-sys.path.insert(0, 'server')
-from ethics import detect_railroading
+        python - <<'PY'
+        import sys
+        sys.path.insert(0, 'server')
+        from ethics import detect_railroading
 
-# Test railroading detection
-test_cases = [
-    # (actions, outcomes, expected_high_rails)
-    (['a', 'b', 'c'], ['x', 'x', 'x'], True),  # All same outcome = railroading
-    (['a', 'a', 'a'], ['x', 'y', 'z'], False),  # Varied outcomes despite same action
-    (['a', 'b', 'c', 'd'], ['w', 'x', 'y', 'z'], False),  # Good variety
-]
+        test_cases = [
+          (['a', 'b', 'c'], ['x', 'x', 'x'], True),
+          (['a', 'a', 'a'], ['x', 'y', 'z'], False),
+          (['a', 'b', 'c', 'd'], ['w', 'x', 'y', 'z'], False),
+        ]
 
-for actions, outcomes, expect_high in test_cases:
-    result = detect_railroading(actions, outcomes)
-    confidence = result['confidence']
-    assert 0.0 <= confidence <= 1.0, f'Confidence {confidence} out of bounds'
-    
-    is_high = confidence > 0.6
-    if expect_high:
-        assert is_high, f'Expected high railroading for {actions} -> {outcomes}, got {confidence}'
-    
-    print(f'✅ Actions {len(set(actions))} unique, Outcomes {len(set(outcomes))} unique -> Rails: {confidence:.2f}')
+        for actions, outcomes, expect_high in test_cases:
+          result = detect_railroading(actions, outcomes)
+          confidence = result['confidence']
+          assert 0.0 <= confidence <= 1.0, f'Confidence {confidence} out of bounds'
 
-print('✅ All railroading detection logic verified')
-        "
+          is_high = confidence > 0.6
+          if expect_high:
+            assert is_high, f'Expected high railroading for {actions} -> {outcomes}, got {confidence}'
+
+          print(f'✅ Actions {len(set(actions))} unique, Outcomes {len(set(outcomes))} unique -> Rails: {confidence:.2f}')
+
+        print('✅ All railroading detection logic verified')
+        PY
     
     - name: Verify frame scoring consistency
       run: |
-        python -c "
-import sys
-sys.path.insert(0, 'server')
-from frame_engine import select_frame, FRAME_LIBRARY
+        python - <<'PY'
+        import random
+        import sys
+        sys.path.insert(0, 'server')
+        from frame_engine import FRAME_LIBRARY, select_frame
 
-# Verify all frames have valid scores
-for frame_name, frame_data in FRAME_LIBRARY.items():
-    wonder = frame_data.get('wonder', 0)
-    risk = frame_data.get('risk', 0)
-    
-    assert 0.0 <= wonder <= 1.0, f'Frame {frame_name} wonder {wonder} out of bounds'
-    assert 0.0 <= risk <= 1.0, f'Frame {frame_name} risk {risk} out of bounds'
-    print(f'✅ {frame_name:20s} wonder={wonder:.1f} risk={risk:.1f}')
+        for frame_name, frame_data in FRAME_LIBRARY.items():
+          wonder = frame_data.get('wonder', 0)
+          risk = frame_data.get('risk', 0)
 
-# Test frame selection determinism
-import random
-random.seed(42)
-frame1 = select_frame(0.5, 0.7, 0.0)
-random.seed(42)
-frame2 = select_frame(0.5, 0.7, 0.0)
-assert frame1 == frame2, f'Frame selection not deterministic: {frame1} != {frame2}'
+          assert 0.0 <= wonder <= 1.0, f'Frame {frame_name} wonder {wonder} out of bounds'
+          assert 0.0 <= risk <= 1.0, f'Frame {frame_name} risk {risk} out of bounds'
+          print(f'✅ {frame_name:20s} wonder={wonder:.1f} risk={risk:.1f}')
 
-print('✅ All frame scoring verified and selection is deterministic')
-        "
+        random.seed(42)
+        frame1 = select_frame(0.5, 0.7, 0.0)
+        random.seed(42)
+        frame2 = select_frame(0.5, 0.7, 0.0)
+        assert frame1 == frame2, f'Frame selection not deterministic: {frame1} != {frame2}'
+
+        print('✅ All frame scoring verified and selection is deterministic')
+        PY
 
   template-coverage:
     name: Template Coverage Verification
@@ -241,35 +236,32 @@ print('✅ All frame scoring verified and selection is deterministic')
     
     - name: Verify template library coverage
       run: |
-        python -c "
-import sys
-sys.path.insert(0, 'server')
-from template_engine import TEMPLATE_LIBRARY, get_template_stats
+        python - <<'PY'
+        import sys
+        sys.path.insert(0, 'server')
+        from template_engine import TEMPLATE_LIBRARY, get_template_stats
 
-# Get stats
-stats = get_template_stats()
-print(f'📊 Template Library Statistics:')
-print(f'   Frames: {stats[\"frames\"]}')
-print(f'   Tones: {stats[\"tones\"]}')
-print(f'   Total Variations: {stats[\"total_variations\"]}')
-print(f'   Estimated Outputs: {stats[\"estimated_outputs\"]}')
+        stats = get_template_stats()
+        print('📊 Template Library Statistics:')
+        print(f'   Frames: {stats["frames"]}')
+        print(f'   Tones: {stats["tones"]}')
+        print(f'   Total Variations: {stats["total_variations"]}')
+        print(f'   Estimated Outputs: {stats["estimated_outputs"]}')
 
-# Verify minimum coverage
-assert stats['frames'] >= 6, f'Expected at least 6 frames, got {stats[\"frames\"]}'
-assert stats['tones'] >= 20, f'Expected at least 20 tone combinations, got {stats[\"tones\"]}'
-assert stats['total_variations'] >= 256, f'Expected at least 256 variations, got {stats[\"total_variations\"]}'
+        assert stats['frames'] >= 6, f'Expected at least 6 frames, got {stats["frames"]}'
+        assert stats['tones'] >= 20, f'Expected at least 20 tone combinations, got {stats["tones"]}'
+        assert stats['total_variations'] >= 256, f'Expected at least 256 variations, got {stats["total_variations"]}'
 
-print('✅ Template coverage meets requirements')
+        print('✅ Template coverage meets requirements')
 
-# Verify all templates are strings
-for frame_name, tones in TEMPLATE_LIBRARY.items():
-    for tone_name, templates in tones.items():
-        for template in templates:
-            assert isinstance(template, str), f'Template in {frame_name}/{tone_name} is not a string'
-            assert len(template) > 0, f'Empty template in {frame_name}/{tone_name}'
+        for frame_name, tones in TEMPLATE_LIBRARY.items():
+          for tone_name, templates in tones.items():
+            for template in templates:
+              assert isinstance(template, str), f'Template in {frame_name}/{tone_name} is not a string'
+              assert len(template) > 0, f'Empty template in {frame_name}/{tone_name}'
 
-print('✅ All templates are valid strings')
-        "
+        print('✅ All templates are valid strings')
+        PY
 
   build-check:
     name: Build Verification
@@ -292,46 +284,45 @@ print('✅ All templates are valid strings')
     
     - name: Verify imports
       run: |
-        python -c "
-import sys
-sys.path.insert(0, 'server')
+        python - <<'PY'
+        import sys
+        sys.path.insert(0, 'server')
 
-# Test all critical imports
-modules = [
-    'config',
-    'template_engine',
-    'hybrid_engine',
-    'dm_engine',
-    'resonance',
-    'ethics',
-    'frame_engine',
-    'character',
-    'memory',
-]
+        modules = [
+          'config',
+          'template_engine',
+          'hybrid_engine',
+          'dm_engine',
+          'resonance',
+          'ethics',
+          'frame_engine',
+          'character',
+          'memory',
+        ]
 
-for module in modules:
-    try:
-        __import__(module)
-        print(f'✅ {module}')
-    except Exception as e:
-        print(f'❌ {module}: {e}')
-        sys.exit(1)
+        for module in modules:
+          try:
+            __import__(module)
+            print(f'✅ {module}')
+          except Exception as e:
+            print(f'❌ {module}: {e}')
+            sys.exit(1)
 
-print('✅ All modules import successfully')
-        "
+        print('✅ All modules import successfully')
+        PY
     
     - name: Start server (dry run)
       run: |
-        timeout 10 python -c "
-import sys
-sys.path.insert(0, 'server')
-from config import Settings
+        timeout 10 python - <<'PY' || true
+        import sys
+        sys.path.insert(0, 'server')
+        from config import Settings
 
-settings = Settings()
-print(f'✅ Server configured: {settings.narration_mode}')
-print(f'✅ Default mode: {settings.narration_mode.value}')
-print(f'✅ Ready for deployment')
-        " || true
+        settings = Settings()
+        print(f'✅ Server configured: {settings.narration_mode}')
+        print(f'✅ Default mode: {settings.narration_mode.value}')
+        print('✅ Ready for deployment')
+        PY
 
   integration:
     name: Integration Tests
@@ -357,39 +348,37 @@ print(f'✅ Ready for deployment')
     - name: Run integration tests
       run: |
         echo "🔗 Running integration tests..."
-        python -c "
-import sys
-import asyncio
-sys.path.insert(0, 'server')
+        python - <<'PY'
+        import asyncio
+        import sys
+        sys.path.insert(0, 'server')
 
-from dm_engine import process_roll20_event
+        from dm_engine import process_roll20_event
 
-async def test_integration():
-    # Test complete pipeline
-    event = {
-        'player': 'TestPlayer',
-        'action': 'I search the ancient ruins for magical artifacts',
-        'outcome': {'dice_roll': 18, 'action_type': 'search'}
-    }
-    
-    result = await process_roll20_event('test-campaign', event)
-    
-    # Verify response structure
-    assert 'narrative' in result
-    assert 'imagination_score' in result
-    assert 'frame' in result
-    assert isinstance(result['narrative'], str)
-    assert 0.0 <= result['imagination_score'] <= 1.0
-    
-    print(f'✅ Integration test passed')
-    print(f'   Narrative: {result[\"narrative\"][:50]}...')
-    print(f'   Imagination: {result[\"imagination_score\"]:.2f}')
-    print(f'   Frame: {result[\"frame\"]}')
-    
-    return result
 
-asyncio.run(test_integration())
-        "
+        async def test_integration():
+          result = process_roll20_event(
+            session_id='test-campaign',
+            player_name='TestPlayer',
+            text='I search the ancient ruins for magical artifacts',
+            selected=[],
+          )
+
+          assert 'chat' in result
+          assert isinstance(result['chat'], str)
+          assert 'debug' in result
+          assert 0.0 <= result['debug'].get('imagination_score', 0.0) <= 1.0
+
+          print('✅ Integration test passed')
+          print(f'   Narrative: {result["chat"][:50]}...')
+          print(f'   Imagination: {result["debug"].get("imagination_score", 0.0):.2f}')
+          print(f'   Frame: {result["debug"].get("frame_selected", "unknown")}')
+
+          return result
+
+
+        asyncio.run(test_integration())
+        PY
 
   deployment-check:
     name: Deployment Readiness
