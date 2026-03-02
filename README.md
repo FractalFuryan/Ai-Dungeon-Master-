@@ -3,18 +3,20 @@
 **The World's First Persistent Narrative Ecology Engine**  
 *Rules-First AI Dungeon Master with Deterministic Dice, Intergenerational Legacy Tracking, and Psychological Horror Mechanics*
 
-[![Python](https://img.shields.io/badge/Python-3.11+-blue?style=for-the-badge&logo=python&logoColor=white)](https://python.org)
-[![FastAPI](https://img.shields.io/badge/FastAPI-005571?style=for-the-badge&logo=fastapi)](https://fastapi.tiangolo.com)
-[![Tests](https://img.shields.io/badge/tests-51_passing-brightgreen?style=for-the-badge&logo=pytest)](https://github.com/FractalFuryan/voicedm/actions)
-[![License](https://img.shields.io/badge/license-MIT-green?style=for-the-badge)](LICENSE)
-[![Stars](https://img.shields.io/github/stars/FractalFuryan/voicedm?style=for-the-badge&logo=github)](https://github.com/FractalFuryan/voicedm/stargazers)
-[![Discord](https://img.shields.io/badge/Discord-Join-7289DA?style=for-the-badge&logo=discord&logoColor=white)](https://discord.gg/voicedm)
-[![Docker](https://img.shields.io/badge/Docker-Ready-2496ED?style=for-the-badge&logo=docker&logoColor=white)](https://hub.docker.com/r/voicedm/voicedm)
-[![PWA](https://img.shields.io/badge/PWA-Ready-5A0FC8?style=for-the-badge&logo=pwa)](https://web.dev/progressive-web-apps/)
-[![OpenAI](https://img.shields.io/badge/OpenAI-Optional-412991?style=for-the-badge&logo=openai)](https://openai.com)
-[![Ollama](https://img.shields.io/badge/Ollama-Local-000000?style=for-the-badge&logo=llama)](https://ollama.ai)
-[![Railway](https://img.shields.io/badge/Railway-Deploy-0B0D0E?style=for-the-badge&logo=railway)](https://railway.app)
-[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=for-the-badge)](http://makeapullrequest.com)
+<div align="center">
+
+[![Python](https://img.shields.io/badge/Python-3.11%2B-3776AB?style=for-the-badge&logo=python&logoColor=white&labelColor=1F2937)](https://python.org)
+[![FastAPI](https://img.shields.io/badge/FastAPI-005571?style=for-the-badge&logo=fastapi&logoColor=white&labelColor=1F2937)](https://fastapi.tiangolo.com)
+[![Tests](https://img.shields.io/badge/Tests-51%20Passing-16A34A?style=for-the-badge&logo=pytest&logoColor=white&labelColor=1F2937)](https://github.com/FractalFuryan/voicedm/actions)
+[![License](https://img.shields.io/badge/License-MIT-22C55E?style=for-the-badge&logo=open-source-initiative&logoColor=white&labelColor=1F2937)](LICENSE)
+[![Docker](https://img.shields.io/badge/Docker-Ready-2496ED?style=for-the-badge&logo=docker&logoColor=white&labelColor=1F2937)](https://hub.docker.com/r/voicedm/voicedm)
+[![PWA](https://img.shields.io/badge/PWA-Ready-5A0FC8?style=for-the-badge&logo=pwa&logoColor=white&labelColor=1F2937)](https://web.dev/progressive-web-apps/)
+[![OpenAI](https://img.shields.io/badge/OpenAI-Optional-412991?style=for-the-badge&logo=openai&logoColor=white&labelColor=1F2937)](https://openai.com)
+[![Ollama](https://img.shields.io/badge/Ollama-Local-111827?style=for-the-badge&logo=llama&logoColor=white&labelColor=1F2937)](https://ollama.ai)
+[![Railway](https://img.shields.io/badge/Railway-Deploy-0B0D0E?style=for-the-badge&logo=railway&logoColor=white&labelColor=1F2937)](https://railway.app)
+[![PRs Welcome](https://img.shields.io/badge/PRs-Welcome-22C55E?style=for-the-badge&logo=github&logoColor=white&labelColor=1F2937)](http://makeapullrequest.com)
+
+</div>
 
 ---
 
@@ -260,7 +262,7 @@ voicedm/
 - [x] 51 passing tests
 - [x] WebSocket real-time sync
 
-### 🚧 **In Progress (Next 2 Weeks)**
+### 🚧 **In Progress**
 - [ ] Complete veil_nodes + silence propagation thresholds
 - [ ] Fully implement peripheral ripening triggers
 - [ ] Perspective vectors faction system
@@ -268,7 +270,7 @@ voicedm/
 - [ ] Living world clock (off-screen events)
 - [ ] Session recap export (Markdown → PDF)
 
-### 🔥 **Coming Hot (1 Month)**
+### 🔥 **Coming Hot**
 - [ ] HTMX + Alpine.js frontend (featherweight)
 - [ ] PWA with offline dice rolling
 - [ ] Leaflet.js dynamic map with token drag
