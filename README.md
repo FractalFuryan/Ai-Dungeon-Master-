@@ -1,13 +1,13 @@
-# ⚔️ VoiceDM
+# ⚔️ AI Dungeon Master
 
-**The World's First Persistent Narrative Ecology Engine**  
+**AI Dungeon Master (VoiceDM) — Persistent Narrative Ecology Engine**  
 *Rules-First AI Dungeon Master with Deterministic Dice, Intergenerational Legacy Tracking, and Psychological Horror Mechanics*
 
 <div align="center">
 
 [![Python](https://img.shields.io/badge/Python-3.11%2B-3776AB?style=for-the-badge&logo=python&logoColor=white&labelColor=1F2937)](https://python.org)
 [![FastAPI](https://img.shields.io/badge/FastAPI-005571?style=for-the-badge&logo=fastapi&logoColor=white&labelColor=1F2937)](https://fastapi.tiangolo.com)
-[![Tests](https://img.shields.io/badge/Tests-51%20Passing-16A34A?style=for-the-badge&logo=pytest&logoColor=white&labelColor=1F2937)](https://github.com/FractalFuryan/voicedm/actions)
+[![Tests](https://img.shields.io/badge/Tests-51%20Passing-16A34A?style=for-the-badge&logo=pytest&logoColor=white&labelColor=1F2937)](https://github.com/FractalFuryan/Ai-Dungeon-Master-/actions)
 [![License](https://img.shields.io/badge/License-MIT-22C55E?style=for-the-badge&logo=open-source-initiative&logoColor=white&labelColor=1F2937)](LICENSE)
 [![Docker](https://img.shields.io/badge/Docker-Ready-2496ED?style=for-the-badge&logo=docker&logoColor=white&labelColor=1F2937)](https://hub.docker.com/r/voicedm/voicedm)
 [![PWA](https://img.shields.io/badge/PWA-Ready-5A0FC8?style=for-the-badge&logo=pwa&logoColor=white&labelColor=1F2937)](https://web.dev/progressive-web-apps/)
@@ -21,7 +21,7 @@
 ---
 
 <div align="center">
-  <img src="screenshots/hero-demo.gif" alt="VoiceDM in action" width="800"/>
+  <img src="screenshots/hero-demo.gif" alt="AI Dungeon Master in action" width="800"/>
   
   **Voice-driven · Multiplayer · QR Code Join · Zero Dependencies · Generational Campaigns**
   
@@ -30,9 +30,9 @@
 
 ---
 
-## 🎯 **Why VoiceDM is Different**
+## 🎯 **Why AI Dungeon Master is Different**
 
-| Feature | VoiceDM | ChatGPT DMs | Other AI DM Bots |
+| Feature | AI Dungeon Master | ChatGPT DMs | Other AI DM Bots |
 |---------|---------|-------------|------------------|
 | **Deterministic Dice** | ✅ OS entropy, ±3 caps, 4 modes | ❌ Black box | ❌ Black box |
 | **Intergenerational Legacy** | ✅ Dead characters shape future worlds | ❌ Forgets after session | ❌ No memory |
@@ -52,7 +52,7 @@
 
 One-click deploy yourself:
 [![Deploy on Railway](https://railway.app/button.svg)](https://railway.app/template/voicedm)
-[![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/FractalFuryan/voicedm)
+[![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/FractalFuryan/Ai-Dungeon-Master-)
 
 ---
 
@@ -148,8 +148,8 @@ def resolve_action(player_input):
 
 ### One-Liner (if you have Python)
 ```bash
-git clone https://github.com/FractalFuryan/voicedm.git
-cd voicedm
+git clone https://github.com/FractalFuryan/Ai-Dungeon-Master-.git
+cd Ai-Dungeon-Master-
 pip install -r requirements.txt
 cp .env.example .env
 python -c "from server.database import init_db; init_db()"
@@ -202,7 +202,7 @@ curl -X POST http://localhost:8000/api/retirement/calculate \
 
 ## 🏗 **Project Structure**
 ```
-voicedm/
+Ai-Dungeon-Master-/
 ├── server/
 │   ├── main.py              # FastAPI app with WebSockets
 │   ├── models.py             # SQLAlchemy ORM (12 tables)
