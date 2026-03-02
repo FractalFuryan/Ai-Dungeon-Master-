@@ -56,25 +56,6 @@ One-click deploy yourself:
 
 ---
 
-## 📸 **See It In Action**
-
-<div align="center">
-  <table>
-    <tr>
-      <td><img src="screenshots/qr-join.gif" alt="QR Join" width="250"/><br/><b>📱 QR Join</b></td>
-      <td><img src="screenshots/map-overlay.png" alt="Map Overlay" width="250"/><br/><b>🗺 Live Map with Veil Nodes</b></td>
-      <td><img src="screenshots/dice-roll.gif" alt="Dice Roll" width="250"/><br/><b>🎲 3d6 Resolution</b></td>
-    </tr>
-    <tr>
-      <td><img src="screenshots/legacy-ledger.png" alt="Legacy Ledger" width="250"/><br/><b>📜 Intergenerational Legacy</b></td>
-      <td><img src="screenshots/scanner.jpg" alt="QR Scanner" width="250"/><br/><b>🔍 Ruleset Scanner</b></td>
-      <td><img src="screenshots/retirement.jpg" alt="Retirement" width="250"/><br/><b>⚖️ Retirement Deposit</b></td>
-    </tr>
-  </table>
-</div>
-
----
-
 ## 🧠 **Core Architecture**
 
 ### 🌍 **World Layer**
