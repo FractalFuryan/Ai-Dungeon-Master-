@@ -304,13 +304,6 @@ LOG_LEVEL=info
 | **Sci-Fi Overseer** | Onyx | Cold, clinical | Cyberpunk |
 
 
-### 🌟 **Contributors Welcome!**
-[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=for-the-badge)](http://makeapullrequest.com)
-[![Open Issues](https://img.shields.io/github/issues/FractalFuryan/voicedm?style=for-the-badge)](https://github.com/FractalFuryan/voicedm/issues)
-[![Good First Issues](https://img.shields.io/github/issues/FractalFuryan/voicedm/good%20first%20issue?style=for-the-badge)](https://github.com/FractalFuryan/voicedm/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22)
-
----
-
 ## 📚 **Documentation**
 
 - [Getting Started Guide](docs/GETTING_STARTED.md)
@@ -328,23 +321,6 @@ LOG_LEVEL=info
 ## 📜 **License**
 
 MIT © FractalFuryan — do whatever you want, just give credit.
-
----
-
-<div align="center">
-  <h3>⭐ Star us on GitHub — it helps more than you know! ⭐</h3>
-  
-  [![GitHub stars](https://img.shields.io/github/stars/FractalFuryan/voicedm?style=social)](https://github.com/FractalFuryan/voicedm/stargazers)
-  [![Twitter Follow](https://img.shields.io/twitter/follow/voicedm_rpg?style=social)](https://twitter.com/voicedm_rpg)
-  
-  <hr/>
-  
-  <sub>Built with 🎲 and ☕ by dungeon masters who believe rules matter</sub>
-  
-  <br/>
-  
-  **"If it rolls dice, it should be fair. If it tells stories, it should be honest."**
-</div>
 
 ---
 
