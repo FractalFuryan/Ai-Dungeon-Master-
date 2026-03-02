@@ -9,7 +9,7 @@
 [![FastAPI](https://img.shields.io/badge/FastAPI-005571?style=for-the-badge&logo=fastapi&logoColor=white&labelColor=1F2937)](https://fastapi.tiangolo.com)
 [![Tests](https://img.shields.io/badge/Tests-51%20Passing-16A34A?style=for-the-badge&logo=pytest&logoColor=white&labelColor=1F2937)](https://github.com/FractalFuryan/Ai-Dungeon-Master-/actions)
 [![License](https://img.shields.io/badge/License-MIT-22C55E?style=for-the-badge&logo=open-source-initiative&logoColor=white&labelColor=1F2937)](LICENSE)
-[![Docker](https://img.shields.io/badge/Docker-Ready-2496ED?style=for-the-badge&logo=docker&logoColor=white&labelColor=1F2937)](https://hub.docker.com/r/voicedm/voicedm)
+[![Docker](https://img.shields.io/badge/Docker-Ready-2496ED?style=for-the-badge&logo=docker&logoColor=white&labelColor=1F2937)](https://github.com/FractalFuryan/Ai-Dungeon-Master-)
 [![PWA](https://img.shields.io/badge/PWA-Ready-5A0FC8?style=for-the-badge&logo=pwa&logoColor=white&labelColor=1F2937)](https://web.dev/progressive-web-apps/)
 [![OpenAI](https://img.shields.io/badge/OpenAI-Optional-412991?style=for-the-badge&logo=openai&logoColor=white&labelColor=1F2937)](https://openai.com)
 [![Ollama](https://img.shields.io/badge/Ollama-Local-111827?style=for-the-badge&logo=llama&logoColor=white&labelColor=1F2937)](https://ollama.ai)
@@ -21,11 +21,9 @@
 ---
 
 <div align="center">
-  <img src="screenshots/hero-demo.gif" alt="AI Dungeon Master in action" width="800"/>
-  
   **Voice-driven · Multiplayer · QR Code Join · Zero Dependencies · Generational Campaigns**
-  
-  No apps. No accounts. No Discord. Just phones, imagination, and consequences that echo through generations.
+
+  No apps. No accounts. Just phones, imagination, and consequences that echo through generations.
 </div>
 
 ---
@@ -51,7 +49,7 @@
 **[Try VoiceDM Now →](https://voicedm.fly.dev)**
 
 One-click deploy yourself:
-[![Deploy on Railway](https://railway.app/button.svg)](https://railway.app/template/voicedm)
+[![Deploy on Railway](https://railway.app/button.svg)](https://railway.app/new/template?template=https://github.com/FractalFuryan/Ai-Dungeon-Master-)
 [![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/FractalFuryan/Ai-Dungeon-Master-)
 
 ---
@@ -131,7 +129,6 @@ def resolve_action(player_input):
 ### 🔌 **Integration**
 - ✅ Roll20 relay (no ToS violations)
 - ✅ Foundry VTT plugin (coming soon)
-- ✅ Discord bot mode (coming soon)
 - ✅ Local LLM support (Ollama/LM Studio)
 - ✅ OpenAI optional enhancement
 
@@ -162,7 +159,7 @@ docker run -p 8000:8000 -v $(pwd)/data:/app/data voicedm/voicedm:latest
 ```
 
 ### Railway (1-click)
-[![Deploy on Railway](https://railway.app/button.svg)](https://railway.app/template/voicedm)
+[![Deploy on Railway](https://railway.app/button.svg)](https://railway.app/new/template?template=https://github.com/FractalFuryan/Ai-Dungeon-Master-)
 
 ---
 
@@ -258,7 +255,6 @@ Ai-Dungeon-Master-/
 - [ ] Local LLM support (Ollama/LM Studio)
 - [ ] pgvector for true long-term memory
 - [ ] Ruleset gallery (share custom JSON)
-- [ ] Discord bot mode
 - [ ] Foundry VTT plugin
 
 ### 🌟 **Future Legendary**
@@ -327,8 +323,8 @@ MIT © FractalFuryan — do whatever you want, just give credit.
 ## 🚨 **One-Click Actions (Do These NOW)**
 
 ```bash
-# 1. Rename repo (GitHub UI)
-# Settings → Repository name → "voicedm"
+# 1. Verify repo name (GitHub UI)
+# Settings → Repository name should be "Ai-Dungeon-Master-"
 
 # 2. Add topics (GitHub UI)
 # Topics: ai-dungeon-master, ttrpg, dnd, rpg-engine, persistent-world
@@ -338,13 +334,10 @@ git add README.md
 git commit -m "feat: Complete README overhaul with badges, roadmap, and screenshots"
 git push origin main
 
-# 4. Create Discord server
-# discord.new → name "VoiceDM Tavern"
-
-# 5. Deploy to Railway (15 min)
+# 4. Deploy to Railway (15 min)
 # Click the Railway button in README
 
-# 6. Post launch thread
+# 5. Post launch thread
 # "I built an AI DM that remembers your dead characters' grandchildren..."
 ```
 
