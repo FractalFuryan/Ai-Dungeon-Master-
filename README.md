@@ -112,6 +112,24 @@ def resolve_action(player_input):
 - ✅ **Legacy Ledger** – Intergenerational memory (dead characters shape future)
 - ✅ **Living World Clock** – Off-screen events between sessions
 
+### 🎭 **Party Origin & Myth Systems**
+- ✅ **Triatic Litany Party Origins** – No Patron, Incompetent Heroes, Glory Not Binding
+- ✅ **Party Bond Engine** – Shared trauma/victory events with bond-state bonuses
+- ✅ **Reverence Economy** – Underdog/gifted XP dynamics with token spend effects
+- ✅ **Memythic Strain Thresholds** – Veil propagation, dream logic, and reality fracture pressure
+- ✅ **Thread Tracking** – Session-tested thread logging with persistence
+- ✅ **Artifact Symbol Integration** – Discover/use/transfer artifacts that inject symbols into reality
+- ✅ **Litany-Weighted Oracle** – Composition-based oracle weighting by party origin
+- ✅ **World Snapshot API** – Unified world + myth + party runtime state endpoint
+
+### 🕸 **Peripheral Lattice + Reweave Largess**
+- ✅ **Peripheral Lattice Protocol** – Currents, markers, ripeness, and motive-node synthesis
+- ✅ **Lattice Director** – Session-level lattice drift, pressure, and ritual surfaces
+- ✅ **Shard Graves** – Closed campaigns stored as interviewable memory structures
+- ✅ **Largess Seeds** – Retirements and unresolved currents become claimable successor hooks
+- ✅ **Reweave Dawn Rituals** – New shard bootstrapping from selected inherited seeds
+- ✅ **Persistent Largess State** – Graves, seeds, and dawns persisted via SQLAlchemy + Alembic (`0005`)
+
 ### 🗺 **Map Engine**
 - ✅ Dynamic overlays (ink, veil nodes, faction influence)
 - ✅ Runtime area claiming
@@ -153,6 +171,21 @@ python -c "from server.database import init_db; init_db()"
 uvicorn server.main:app --reload --host 0.0.0.0 --port 8000
 ```
 
+### Database Migrations (Alembic)
+```bash
+# Install dev dependencies (includes alembic)
+pip install -r requirements-dev.txt
+
+# Apply latest migrations
+python -m alembic upgrade head
+
+# Check current revision
+python -m alembic current
+
+# Create a new migration after model changes
+python -m alembic revision -m "describe_change"
+```
+
 ### Docker (recommended)
 ```bash
 docker run -p 8000:8000 -v $(pwd)/data:/app/data voicedm/voicedm:latest
@@ -181,10 +214,25 @@ curl -X POST http://localhost:8000/api/worlds/{world_id}/cycles \
 
 ### Resolve an Action
 ```bash
-curl -X POST http://localhost:8000/api/resolve \
+curl -X POST http://localhost:8000/api/resolve/action \
   -H "Content-Type: application/json" \
-  -d '{"base_modifier": 2, "positives": [1, 1], "negatives": [1]}'
+  -d '{"world_id": "<world_id>", "base_modifier": 2, "positives": [1, 1], "negatives": [1]}'
 # Returns: {"total": 14, "rolls": [5, 4, 3], "modifier": 2, "critical": false}
+```
+
+### Create a Party Origin (Triatic Litany)
+```bash
+curl -X POST "http://localhost:8000/api/party/create?world_id=<world_id>&litany_cut=no_patron&party_name=The%20Unbound"
+```
+
+### Pull a World + Myth Snapshot
+```bash
+curl "http://localhost:8000/api/world/state?world_id=<world_id>"
+```
+
+### Discover an Artifact
+```bash
+curl -X POST "http://localhost:8000/api/artifacts/troll/discover?world_id=<world_id>&location_id=<location_id>"
 ```
 
 ### Calculate Retirement
@@ -195,16 +243,38 @@ curl -X POST http://localhost:8000/api/retirement/calculate \
 # Returns: {"banked_xp": 2940, "multiplier": 1.2, "legacy_features": 2, "remaining_xp": 940}
 ```
 
+### Close a Shard into a Grave
+```bash
+curl -X POST "http://localhost:8000/api/largess/shard/close?world_id=<world_id>&shard_name=Ashen%20March&final_ritual_words=We%20remember&final_ritual_words=Carry%20the%20fire"
+```
+
+### Dawn a New Shard from a Grave
+```bash
+curl -X POST "http://localhost:8000/api/largess/shard/dawn?world_id=<world_id>&shard_name=Glass%20Frontier&transition_type=rebirth&source_grave_id=<grave_id>" \
+  -H "Content-Type: application/json" \
+  -d '[{"player_id":"p1","character_name":"Nyra","intent":"seek redemption"}]'
+```
+
+### Inspect Persisted Largess State
+```bash
+curl "http://localhost:8000/api/largess/state?world_id=<world_id>"
+```
+
 ---
 
 ## 🏗 **Project Structure**
 ```
 Ai-Dungeon-Master-/
+├── alembic/                  # Migration config + revision history
+│   └── versions/
 ├── server/
 │   ├── main.py              # FastAPI app with WebSockets
 │   ├── models.py             # SQLAlchemy ORM (12 tables)
 │   ├── schemas.py            # Pydantic validation
 │   ├── mechanics.py          # Dice core + governors
+│   ├── mechanics/            # Modular dice engine + compatibility wrapper
+│   ├── engine/               # Myth simulation engines + orchestration services
+│   ├── persistence/          # Additive v2 models + repositories
 │   ├── narrative.py          # Narrative engine + frames
 │   ├── map_engine.py         # Dynamic map overlays
 │   ├── database.py           # DB connection
@@ -212,15 +282,16 @@ Ai-Dungeon-Master-/
 │       ├── worlds.py
 │       ├── cycles.py
 │       ├── sessions.py
-│       └── characters.py
-├── frontend/                  # PWA-ready HTML/JS
-│   ├── index.html
-│   ├── scanner.html
-│   ├── manifest.json          # PWA manifest
-│   └── sw.js                  # Service worker
+│       ├── characters.py
+│       ├── resolve.py
+│       ├── myth.py
+│       ├── party.py
+│       ├── artifacts.py
+│       └── world_state.py
+├── public/                    # PWA-ready HTML/JS client
+├── client/                    # Mobile web shell
 ├── screenshots/               # Marketing assets
 ├── tests/                      # 51 passing tests
-├── examples/                   # Sample worlds & rulesets
 ├── DEPLOYMENT.md               # Railway/Fly.io guide
 ├── ROLL20_GUIDE.md             # Roll20 integration
 └── FEATHERWEIGHT_GUIDE.md      # Zero-dependency mode
@@ -239,6 +310,11 @@ Ai-Dungeon-Master-/
 - [x] Map engine with overlays
 - [x] 51 passing tests
 - [x] WebSocket real-time sync
+- [x] Alembic migration pipeline (`0001` → `0005`)
+- [x] Party origin system (Triatic Litany cuts + persistent party state)
+- [x] Bond/reverence/artifact engines with API endpoints
+- [x] Service-oriented world orchestration (`party_service`, `world_service`, `narrative_service`)
+- [x] World snapshot + narrative thread persistence APIs
 
 ### 🚧 **In Progress**
 - [ ] Complete veil_nodes + silence propagation thresholds

@@ -56,6 +56,7 @@ def init_db():
 
     try:
         from . import models  # noqa: F401  # ensures metadata is registered
+        from .persistence import models as persistence_models  # noqa: F401
 
         Base.metadata.create_all(bind=engine)
     except Exception:

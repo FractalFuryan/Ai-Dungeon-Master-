@@ -20,6 +20,9 @@ mypy>=1.5.0
 bandit>=1.7.5
 safety>=2.3.5
 
+# Database migrations
+alembic>=1.13.0
+
 # Type Stubs
 types-requests>=2.31.0
 

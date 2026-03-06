@@ -5,6 +5,67 @@ All notable changes to AI Dungeon Master will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.4.0] - 2026-03-06
+
+### Added - Living Mythology Systems 🌌
+
+- **Party Origin Engine** (`server/engine/party_origin_engine.py`)
+  - Triatic Litany cuts: `no_patron`, `incompetent_heroes`, `glory_not_binding`
+  - Party bond growth from shared trauma/victory
+  - Reverence token generation/consumption flow
+  - Memythic strain accumulation and party state snapshots
+
+- **Reverence + Strain Engines** (`server/engine/reverence_engine.py`)
+  - XP economy for underdog/gifted progression
+  - `CharacterStatsView.from_character(...)` adapter for existing character model
+  - Strain thresholds driving veil/dream/reality pressure effects
+
+- **Bond, Artifact, and Litany Oracle Systems**
+  - `server/engine/bond_engine.py` for typed bond events
+  - `server/engine/artifact_engine.py` for discover/use/transfer artifact flow
+  - `server/engine/litany_oracle.py` using composition over inheritance
+
+- **Service-Oriented World Orchestration** (`server/engine/services.py`)
+  - `party_service`, `world_service`, and `narrative_service`
+  - Unified `EngineEffects` envelope (`server/engine/effects.py`)
+
+- **New API Surfaces**
+  - `server/api/party.py`
+  - `server/api/artifacts.py`
+  - world snapshot endpoint retained at `GET /api/world/state`
+
+- **Repository Layer for Testability** (`server/persistence/repositories.py`)
+  - Party, thread, token, artifact, and bond repositories
+
+### Changed
+
+- Extended `WorldEngine` (`server/engine/world_engine.py`) with optional `party_id` and party/myth integration while preserving existing resolve and myth routes.
+- Updated dependency injection (`server/api/dependencies.py`) to resolve `party_id` from path/query/body.
+- Expanded thread tracking (`server/engine/thread_engine.py`) with session-aware `record_test` and `get_session_summary`.
+- Updated app/router exports:
+  - `server/api/__init__.py`
+  - `server/main.py`
+  - `server/engine/__init__.py`
+  - `server/persistence/__init__.py`
+
+### Database
+
+- Added Alembic revision `20260306_0004_add_party_myth_tables.py`:
+  - `parties`
+  - `tested_threads`
+  - `reverence_tokens`
+  - `artifact_discoveries`
+  - `bond_events`
+
+### Validation
+
+- Migration chain verified through `20260306_0004` on SQLite.
+- Regression + new feature tests passing:
+  - `tests/test_anchor.py`
+  - `tests/test_veil_nodes.py`
+  - `tests/test_mechanics.py`
+  - `tests/test_party_myth_systems.py`
+
 ## [1.1.0] - 2026-01-01
 
 ### Added - Roll20 Integration 🎲
@@ -88,6 +149,27 @@ Roll20 integration maintains core principles:
 
 ## Release Notes
 
+### Living Mythology Systems (v1.4.0)
+
+This release upgrades the engine from a rules-only resolver into a **party-aware mythology simulator**.
+
+**What's New:**
+- Party origin cuts that shape progression tone and symbolic pressure
+- Bond, reverence, and artifact systems wired into world resolution
+- Litany-weighted oracle behavior via composition
+- Service-oriented orchestration to keep world logic modular
+- Snapshot API for operational world + myth state inspection
+
+**Technical Approach:**
+- Additive persistence (`server/persistence`) with repository abstraction
+- Migration-first rollout via Alembic revisions (`0001` → `0004`)
+- Backward-compatible route behavior maintained for existing resolve/myth endpoints
+
+**Perfect For:**
+- Long campaigns where party identity matters mechanically
+- Narrative-heavy tables that want persistent symbolic consequences
+- GMs who need inspectable world state between sessions
+
 ### Roll20 Integration (v1.1.0)
 
 This release extends AI Dungeon Master to **virtual tabletops** while maintaining the core philosophy: the AI facilitates, never dictates.
@@ -141,3 +223,4 @@ See [ROLL20_GUIDE.md](ROLL20_GUIDE.md) for complete setup.
 
 [1.1.0]: https://github.com/FractalFuryan/Ai-Dungeon-Master-/releases/tag/v1.1.0
 [1.0.0]: https://github.com/FractalFuryan/Ai-Dungeon-Master-/releases/tag/v1.0.0
+[1.4.0]: https://github.com/FractalFuryan/Ai-Dungeon-Master-/releases/tag/v1.4.0

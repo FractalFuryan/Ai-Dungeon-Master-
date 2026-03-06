@@ -1,6 +1,8 @@
-import os
-from pydantic_settings import BaseSettings
 from enum import Enum
+from typing import Literal, Optional
+
+from pydantic import Field
+from pydantic_settings import BaseSettings
 
 try:
     from .randomness import RandomMode
@@ -31,6 +33,45 @@ class Settings(BaseSettings):
         env_file = ".env"
 
 settings = Settings()
+
+
+class Config(BaseSettings):
+    # Database
+    DATABASE_URL: str = Field(default="sqlite:///./voicedm.db", description="Database connection URL")
+
+    # Randomness
+    RANDOMNESS_MODE: Literal["secure", "det", "weighted", "linear"] = Field(
+        default="secure", description="Randomness generation mode"
+    )
+    RANDOMNESS_SEED: Optional[str] = Field(default=None, description="Seed for deterministic mode")
+
+    # Narration
+    NARRATION_MODE: Literal["template", "hybrid", "llm"] = Field(
+        default="template", description="Narration generation mode"
+    )
+    OPENAI_API_KEY: Optional[str] = Field(default=None, description="OpenAI API key for LLM narration")
+    OLLAMA_URL: Optional[str] = Field(default="http://localhost:11434", description="Ollama server URL")
+
+    # Server
+    HOST: str = Field(default="0.0.0.0", description="Server host")
+    PORT: int = Field(default=8000, description="Server port")
+    LOG_LEVEL: Literal["debug", "info", "warning", "error"] = Field(
+        default="info", description="Logging level"
+    )
+
+    # World Settings
+    WORLD_TICK_INTERVAL: int = Field(
+        default=3600, description="World tick interval in seconds (default: 1 hour)"
+    )
+    MAX_MODIFIER: int = Field(default=3, description="Maximum dice modifier")
+    MIN_MODIFIER: int = Field(default=-3, description="Minimum dice modifier")
+
+    class Config:
+        env_file = ".env"
+        case_sensitive = True
+
+
+config = Config()
 
 # Initialize global randomness based on config
 try:
