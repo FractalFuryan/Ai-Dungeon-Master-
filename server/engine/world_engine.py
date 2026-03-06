@@ -11,11 +11,13 @@ from server.engine.anchor_engine import AnchorEngine
 from server.engine.bond_engine import PartyBondSystem
 from server.engine.director_engine import DirectorEngine
 from server.engine.effects import EngineEffects
+from server.engine.ghoul_veil_engine import GhoulAspect, GhoulVeilEngine, VeilNodeState
 from server.engine.inversion_engine import InversionEngine
 from server.engine.largess_bank_engine import LargessBankEngine
 from server.engine.largess_engine import ShardTransition
 from server.engine.lattice_director_engine import LatticeDirectorEngine
 from server.engine.lattice_engine import LatticeEngine
+from server.engine.lattice_engine import CurrentType, LatticeMarker, OpenCurrent, RipenessLevel
 from server.engine.legacy_ledger_engine import LedgerAuditEngine, LegacyFeatureType, LegacyLedgerEngine
 from server.engine.legacy_engine import LegacyEngine
 from server.engine.litany_oracle import LitanyWeightedOracle
@@ -105,6 +107,9 @@ class WorldEngine:
         # Myth graph system.
         self.myth_graph = MythGraphEngine(world_id)
 
+        # Ghoul Hunger Veil.
+        self.ghoul_veil = GhoulVeilEngine(world_id, anchor_map_id="orphans_coast")
+
         if self.party:
             self.oracle = LitanyWeightedOracle(base_oracle, self.party)
 
@@ -115,6 +120,7 @@ class WorldEngine:
         logger.info("Legacy systems initialized for world %s", world_id)
         logger.info("Peripheral lattice initialized for world %s", world_id)
         logger.info("Largess systems initialized for world %s", world_id)
+        logger.info("Ghoul veil initialized for world %s", world_id)
 
     def resolve_action(self, context: Dict[str, Any]) -> Dict[str, Any]:
         action_type = context.get("action_type", "mundane")
@@ -626,3 +632,129 @@ class WorldEngine:
             "bank": self.largess_bank.get_bank_state(),
             "reweave": self.reweave_director.get_reweave_state(),
         }
+
+    def coast_ink_ritual(
+        self,
+        player_id: str,
+        character_name: str,
+        location_name: str,
+        description: str,
+        x: float,
+        y: float,
+    ) -> Dict[str, Any]:
+        node = self.ghoul_veil.coast_ink_ritual(
+            player_id=player_id,
+            character_name=character_name,
+            location_name=location_name,
+            description=description,
+            coordinates=(x, y),
+        )
+
+        # Feed the new inked silence into peripheral lattice as an open current.
+        if hasattr(self, "lattice"):
+            current = OpenCurrent(
+                id=f"ghoul_node_{node.id}",
+                current_type=CurrentType.IGNORED_LOCATION,
+                description=f"Inked ghoul sighting at {location_name}: {description}",
+                created_at=datetime.utcnow(),
+                last_touched=None,
+                ripeness=RipenessLevel.FRESH,
+                markers=[LatticeMarker.RUMOR],
+                location_id=location_name,
+                faction_ids=[],
+                npc_ids=[],
+                wyrd_thread_ids=[],
+            )
+            self.lattice.open_currents[current.id] = current
+
+        return {
+            "node": node.to_dict(),
+            "message": f"The silence near {location_name} is now marked on the map. The veil grows thinner.",
+        }
+
+    def rumor_fulcrum(self) -> Dict[str, Any]:
+        return self.ghoul_veil.rumor_fulcrum_opening()
+
+    def imagine_ghoul(
+        self,
+        player_id: str,
+        character_name: str,
+        aspect: str,
+        description: str,
+        node_id: Optional[str] = None,
+    ) -> Dict[str, Any]:
+        try:
+            ghoul_aspect = GhoulAspect(aspect)
+        except ValueError as exc:
+            raise ValueError(f"Invalid aspect: {aspect}") from exc
+
+        vision = self.ghoul_veil.imagination_completion(
+            player_id=player_id,
+            character_name=character_name,
+            aspect=ghoul_aspect,
+            description=description,
+            node_id=node_id,
+        )
+
+        encounter = None
+        if node_id and random.random() < 0.3:
+            node = self.ghoul_veil.nodes.get(node_id)
+            if node and node.state == VeilNodeState.HUNGRY:
+                encounter = self.ghoul_veil.trigger_encounter(node_id=node_id, players=[player_id])
+
+        return {
+            "vision": vision.to_dict(),
+            "encounter": encounter.to_dict() if encounter else None,
+            "message": f"You see {description}. The blanks fill with your fear.",
+        }
+
+    def trigger_ghoul_encounter(self, node_id: str, players: List[str]) -> Dict[str, Any]:
+        encounter = self.ghoul_veil.trigger_encounter(node_id, players)
+
+        anchor_check = {}
+        for player_id in players:
+            player_nodes = [n for n in self.ghoul_veil.nodes.values() if n.inked_by == player_id]
+            anchor_check[player_id] = {
+                "has_anchors": len(player_nodes) >= 2,
+                "anchor_count": len(player_nodes),
+            }
+
+        return {
+            "encounter": encounter.to_dict(),
+            "anchor_check": anchor_check,
+            "message": "The sketch lies on the table. Silence. What do you see in the blanks?",
+        }
+
+    def daylight_burn(
+        self,
+        encounter_id: str,
+        player_id: str,
+        vulnerability: str,
+        pay_with_reverence: bool = True,
+    ) -> Dict[str, Any]:
+        result = self.ghoul_veil.daylight_burn(
+            encounter_id=encounter_id,
+            player_id=player_id,
+            vulnerability=vulnerability,
+            pay_with_reverence=pay_with_reverence,
+        )
+
+        # Try to consume one available reverence token when paying with reverence.
+        if pay_with_reverence and self.party:
+            tokens = self.party.get_unused_tokens()
+            if tokens:
+                self.party.use_reverence_token(tokens[0].id)
+                self.party_origin.tokens.mark_used(tokens[0].id, used_at=datetime.utcnow())
+
+        return result
+
+    def ghoul_closing_ritual(self, players: List[Dict[str, Any]]) -> Dict[str, Any]:
+        answers = self.ghoul_veil.closing_ritual(players)
+        return {
+            "ritual": "ghoul_veil_closing",
+            "answers": answers,
+            "message": "The veil is spoken. The blanks remember what you saw.",
+        }
+
+    def get_ghoul_state(self) -> Dict[str, Any]:
+        return self.ghoul_veil.get_veil_state()

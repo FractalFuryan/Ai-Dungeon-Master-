@@ -1,4 +1,4 @@
-from . import artifacts, characters, cycles, largess, lattice, legacy, myth, myth_graph, party, resolve, sessions, world_state, worlds
+from . import artifacts, characters, cycles, ghoul_veil, largess, lattice, legacy, myth, myth_graph, party, resolve, sessions, world_state, worlds
 
 __all__ = [
     "worlds",
@@ -10,6 +10,7 @@ __all__ = [
     "world_state",
     "party",
     "artifacts",
+    "ghoul_veil",
     "largess",
     "lattice",
     "legacy",

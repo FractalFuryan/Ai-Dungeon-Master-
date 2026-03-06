@@ -3,6 +3,7 @@ from .anchor_engine import AnchorEngine, AnchorViolation
 from .bond_engine import BondEngine, PartyBondSystem
 from .director_engine import DirectorEngine
 from .effects import EngineEffects, PartyEffectResult
+from .ghoul_veil_engine import GhoulAspect, GhoulEncounter, GhoulVeilEngine, GhoulVeilNode, PlayerVision, VeilNodeState
 from .inversion_engine import InversionEngine
 from .largess_bank_engine import LargessBankEngine
 from .largess_engine import LargessSeed, LargessType, NewShardDawn, ShardGrave, ShardTransition
@@ -37,6 +38,12 @@ __all__ = [
     "DirectorEngine",
     "EngineEffects",
     "PartyEffectResult",
+    "GhoulAspect",
+    "PlayerVision",
+    "GhoulVeilNode",
+    "GhoulEncounter",
+    "VeilNodeState",
+    "GhoulVeilEngine",
     "InversionEngine",
     "LargessType",
     "LargessSeed",

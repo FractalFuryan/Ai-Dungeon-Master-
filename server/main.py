@@ -18,7 +18,7 @@ from .scanner import scan_qr_code, get_rulesets
 from .mechanics import quick_resolve, Governors, dice
 from .map_engine import MapEngine
 from .narrative import NarrativeEngine, LegacyLedger as NarrativeLegacyLedger
-from .api import artifacts, characters, cycles, largess, lattice, legacy, myth, myth_graph, party, resolve, sessions as sessions_api, world_state, worlds
+from .api import artifacts, characters, cycles, ghoul_veil, largess, lattice, legacy, myth, myth_graph, party, resolve, sessions as sessions_api, world_state, worlds
 
 load_dotenv()
 
@@ -61,6 +61,7 @@ app.include_router(myth_graph.router)
 app.include_router(world_state.router)
 app.include_router(party.router)
 app.include_router(artifacts.router)
+app.include_router(ghoul_veil.router)
 
 map_engine = MapEngine()
 narrative_engine = NarrativeEngine()
